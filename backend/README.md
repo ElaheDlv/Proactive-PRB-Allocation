@@ -471,6 +471,8 @@ Example xApps are located in the `network_layer/xApps/` directory:
 - AI service monitoring xApp: Monitors the AI service performance and provides insights.
  - Live KPI Dashboard xApp: Real‑time UE/Cell KPIs with per‑UE cap and per‑slice PRB controls.
 - DQN PRB Allocator xApp: Learns to shift DL PRBs among eMBB/URLLC/mMTC slices using a DQN policy inspired by the Tractor paper.
+- Episodic DQN PRB Allocator xApp: Automates offline RL by replaying a catalog of UE/trace scenarios one episode at a time, resetting the simulator between traces so the DQN trains on finite windows instead of the continual stream.
+- Gym PRB Allocator xApp: Clean-room, two-slice (eMBB/URLLC) DQN agent that speaks a Gym-style API (reset/step) and runs over fully scripted episodes defined in JSON.
 - SB3 DQN PRB Allocator xApp: Same objective as the DQN PRB allocator but powered by Stable-Baselines3.
 
 To load custom xApps, add them to the xApps/ directory and ensure they inherit from the xAppBase class.
@@ -525,6 +527,49 @@ Useful flags/env vars:
 - `--ws-port` / `WS_SERVER_PORT`: WebSocket port for the backend (default `8760`).
 - `--dash-port` / `DASH_PORT`: port for the live KPI dashboard xApp (default `8050`).
 - Frontend instances read `NEXT_PUBLIC_WS_HOST`, `NEXT_PUBLIC_WS_PORT`, and `NEXT_PUBLIC_WS_PROTOCOL` to decide which backend WebSocket to connect to.
+
+#### Episodic training mode
+
+Need finite-length rollouts instead of the continual stream? Enable the episodic variant of the xApp:
+
+```bash
+python backend/main.py --preset simple --mode headless \
+  --dqn-prb-episodic --dqn-train \
+  --dqn-episode-config backend/assets/episodes/sample_config.json
+```
+
+New CLI/env switches:
+
+- `--dqn-prb-episodic` (`DQN_PRB_EPISODIC_ENABLE=1`): activate the episodic xApp (the standard DQN xApp stays off).
+- `--dqn-episode-config <path>` (`DQN_EPISODE_CONFIG_PATH`): JSON file describing the episode catalog.
+- `--dqn-episode-config-json '<json>'` (`DQN_EPISODE_CONFIG_JSON`): inline JSON alternative.
+- `--dqn-episode-loop` (`DQN_EPISODE_LOOP=1`): restart from the first scenario after consuming the list.
+
+Each entry in `backend/assets/episodes/sample_config.json` demonstrates the schema:
+
+- `id`: friendly label for logs.
+- `duration_steps`: number of DQN *decisions* (not simulator ticks) to run before resetting.
+- `slice_prb`: optional per-slice PRB quotas applied to every cell at episode start.
+- `ue_prb_cap`: optional per-UE DL cap.
+- `freeze_mobility`: keep spawned UEs stationary (handy for reproducible traces).
+- `ue_groups`: list of cohorts with `slice`, `count`, and optional traffic descriptors (`trace`/`trace_file`, `ue_ip`, `trace_speedup`, `trace_bin`).
+
+At the start of each episode the xApp clears any auto-spawned UEs, spawns the requested groups, attaches their traces directly at the gNB, resets the replay buffer queues, and runs for `duration_steps` decisions. The last transition in the episode is flagged with `done=True` so the replay buffer learns from terminal rollouts. When an episode finishes the simulator is reset automatically and the next scenario loads—no dashboard/front-end required for training loops.
+
+#### Gym-style two-slice xApp
+
+Need a clean-room agent that only controls eMBB and URLLC? Enable the Gym-flavoured PRB allocator:
+
+```bash
+python backend/main.py --preset simple --mode headless \
+  --prb-gym --prb-gym-config backend/assets/episodes/gym_sample_config.json \
+  --dqn-train --dqn-period 1 --dqn-move-step 2
+```
+
+- Two slices only, so the action space shrinks to 9 combinations (`{-1,0,+1}` deltas for eMBB/URLLC) and the state vector keeps the same KPIs per slice without any mMTC entries.
+- Episodes come from JSON (`backend/assets/episodes/gym_sample_config.json` shows the schema): specify UE counts per slice, the shared trace each slice replays (all UEs in a slice use the same file), playback speed/bin size, initial PRB quotas, whether mobility is frozen, and how many DQN decisions the episode should last.
+- The xApp embeds a Gym-like environment (`reset`/`step` returning `(state, reward, done, info)`) so terminal conditions are explicit. Toggle `--prb-gym-loop` to cycle through the scenario list indefinitely.
+- Hyper-parameters still reuse the existing `--dqn-*` flags/env vars, so you can tune learning rate, epsilon schedule, replay size, etc., exactly as before.
 
 To point the React frontend at a specific backend instance, set these environment variables when launching `npm run dev` (or create a `frontend/.env.local`):
 

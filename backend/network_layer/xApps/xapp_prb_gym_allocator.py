@@ -1,0 +1,645 @@
+"""Gym-style PRB allocator xApp with episodic control over eMBB/URLLC slices.
+
+This module implements a lightweight RL environment that mirrors the simulator
+state through a Gym-like API (reset/step), plus a custom DQN agent that learns
+to shift PRBs between two slices (eMBB, URLLC). Episodes are defined in a JSON
+catalog that specifies UE counts, trace files, and initial PRB quotas.
+"""
+
+import json
+import math
+import os
+import random
+from collections import deque, defaultdict
+from itertools import product
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime
+
+import numpy as np
+
+import settings
+from utils import load_raw_packet_csv
+
+from .xapp_base import xAppBase
+
+SL_E = getattr(settings, "NETWORK_SLICE_EMBB_NAME", "eMBB")
+SL_U = getattr(settings, "NETWORK_SLICE_URLLC_NAME", "URLLC")
+
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    import torch.optim as optim
+
+    TORCH_AVAILABLE = True
+except Exception:
+    TORCH_AVAILABLE = False
+    torch = None
+    nn = None
+    optim = None
+    F = None
+
+
+class _ReplayBuffer:
+    def __init__(self, capacity: int = 100000):
+        self.buf = deque(maxlen=capacity)
+
+    def push(self, s, a, r, ns, d):
+        self.buf.append((s, a, r, ns, d))
+
+    def sample(self, batch_size):
+        batch_size = min(batch_size, len(self.buf))
+        idx = np.random.choice(len(self.buf), batch_size, replace=False)
+        states, actions, rewards, next_states, dones = zip(*[self.buf[i] for i in idx])
+        return (
+            torch.tensor(states, dtype=torch.float32),
+            torch.tensor(actions, dtype=torch.long),
+            torch.tensor(rewards, dtype=torch.float32),
+            torch.tensor(next_states, dtype=torch.float32),
+            torch.tensor(dones, dtype=torch.float32),
+        )
+
+    def __len__(self):
+        return len(self.buf)
+
+
+class _DQN(nn.Module):
+    def __init__(self, in_dim: int, out_dim: int):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(in_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, out_dim),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+class PRBGymEnv:
+    """Minimal Gym-like environment that exposes reset/step for PRB allocation."""
+
+    def __init__(self, ric):
+        self.ric = ric
+        self.sim_engine = getattr(ric, "simulation_engine", None)
+        self.period_steps = max(1, int(getattr(settings, "DQN_PRB_DECISION_PERIOD_STEPS", 1)))
+        self.move_step = max(1, int(getattr(settings, "DQN_PRB_MOVE_STEP", 1)))
+        self.norm_dl_mbps = float(getattr(settings, "DQN_NORM_MAX_DL_MBPS", 100.0))
+        self.norm_buf_bytes = float(getattr(settings, "DQN_NORM_MAX_BUF_BYTES", 1e6))
+        self.need_saturation = max(1e-6, float(getattr(settings, "DQN_NEED_SATURATION", 1.5)))
+        self.urlc_gamma_s = float(getattr(settings, "DQN_URLLC_GAMMA_S", 0.01))
+        self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.5))
+        self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.5))
+
+        self._episodes = self._load_episode_specs()
+        self._episode_loop = getattr(settings, "PRB_GYM_LOOP", False)
+        self._episode_idx = -1
+        self._current_episode = None
+        self._steps_in_episode = 0
+        self._episode_step_limit = 0
+        self._managed_ues: set[str] = set()
+        self._trace_cache: Dict[Tuple[str, str, float], List[Tuple[float, float, float]]] = {}
+        self._action_combos = list(product([-1, 0, 1], repeat=2))
+        self._state_dim = 12
+
+    # ------------------------------------------------------------------ Episode control
+    def _load_episode_specs(self) -> List[Dict]:
+        path = getattr(settings, "PRB_GYM_CONFIG_PATH", "").strip()
+        if not path:
+            return []
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                raw = json.load(fp)
+        except Exception as exc:
+            print(f"PRBGymEnv: failed to load episode config {path}: {exc}")
+            return []
+        if isinstance(raw, dict):
+            entries = raw.get("episodes") or []
+        elif isinstance(raw, list):
+            entries = raw
+        else:
+            return []
+        specs = []
+        for idx, entry in enumerate(entries):
+            spec = self._normalize_episode(entry, idx)
+            if spec:
+                specs.append(spec)
+        return specs
+
+    def _normalize_episode(self, entry, idx: int) -> Optional[Dict]:
+        if not isinstance(entry, dict):
+            return None
+        duration = int(entry.get("duration_steps", 0))
+        if duration <= 0:
+            print(f"PRBGymEnv: episode {idx} missing positive duration_steps; skipping.")
+            return None
+        slices = entry.get("slices") or {}
+        e_cfg = self._normalize_slice_cfg(slices.get(SL_E) or slices.get("eMBB"))
+        u_cfg = self._normalize_slice_cfg(slices.get(SL_U) or slices.get("URLLC"))
+        if e_cfg is None or u_cfg is None:
+            print(f"PRBGymEnv: episode {idx} missing slice configs; skipping.")
+            return None
+        initial_prb = entry.get("initial_prb", {})
+        return {
+            "id": entry.get("id") or f"episode_{idx}",
+            "duration_steps": duration,
+            "freeze_mobility": bool(entry.get("freeze_mobility", True)),
+            "initial_prb": {
+                SL_E: int(initial_prb.get(SL_E, initial_prb.get("eMBB", 0))),
+                SL_U: int(initial_prb.get(SL_U, initial_prb.get("URLLC", 0))),
+            },
+            "slices": {
+                SL_E: e_cfg,
+                SL_U: u_cfg,
+            },
+        }
+
+    def _normalize_slice_cfg(self, cfg) -> Optional[Dict]:
+        if not isinstance(cfg, dict):
+            return None
+        count = int(cfg.get("ue_count", 0))
+        if count <= 0:
+            return None
+        return {
+            "ue_count": count,
+            "trace": cfg.get("trace"),
+            "ue_ip": cfg.get("ue_ip"),
+            "trace_speedup": float(cfg.get("trace_speedup", getattr(settings, "TRACE_SPEEDUP", 1.0))),
+            "trace_bin": float(cfg.get("trace_bin", getattr(settings, "TRACE_BIN", 1.0))),
+        }
+
+    def reset(self):
+        if not self._episodes or self.sim_engine is None:
+            return None
+        next_idx = self._episode_idx + 1
+        if next_idx >= len(self._episodes):
+            if not self._episode_loop:
+                print("PRBGymEnv: episode catalog exhausted; staying on last state.")
+                next_idx = len(self._episodes) - 1
+            else:
+                next_idx = 0
+        self._episode_idx = next_idx
+        self._current_episode = self._episodes[next_idx]
+        self._episode_step_limit = self._current_episode["duration_steps"]
+        self._steps_in_episode = 0
+        self._deploy_episode(self._current_episode)
+        return self._get_state()
+
+    def _deploy_episode(self, spec: Dict):
+        self._clear_managed_ues()
+        self._apply_initial_prb(spec.get("initial_prb", {}))
+        for slice_name in (SL_E, SL_U):
+            cfg = spec["slices"][slice_name]
+            for idx in range(cfg["ue_count"]):
+                imsi = f"GIMSI_{spec['id']}_{slice_name}_{idx}"
+                self._register_episode_ue(imsi, slice_name, cfg)
+
+    def _clear_managed_ues(self):
+        if self.sim_engine is None:
+            return
+        for imsi in list(self.sim_engine.ue_list.keys()):
+            self.sim_engine.deregister_ue(imsi)
+        self._managed_ues.clear()
+
+    def _apply_initial_prb(self, prb_map: Dict[str, int]):
+        if self.sim_engine is None:
+            return
+        for cell in self.sim_engine.cell_list.values():
+            quotas = dict(cell.slice_dl_prb_quota)
+            for sl, val in prb_map.items():
+                quotas[sl] = max(0, int(val))
+            total = sum(quotas.values())
+            max_prb = max(1, int(getattr(cell, "max_dl_prb", 1)))
+            if total > max_prb:
+                scale = max_prb / float(total)
+                for sl in quotas:
+                    quotas[sl] = int(quotas[sl] * scale)
+            cell.slice_dl_prb_quota = quotas
+
+    def _register_episode_ue(self, imsi: str, slice_name: str, slice_cfg: Dict):
+        if self.sim_engine is None:
+            return
+        ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
+        if not ok:
+            return
+        ue = self.sim_engine.ue_list.get(imsi)
+        if ue is None:
+            return
+        if self._current_episode.get("freeze_mobility", True):
+            ue.speed_mps = 0
+            try:
+                ue.set_target(ue.position_x, ue.position_y)
+            except Exception:
+                pass
+        trace_path = slice_cfg.get("trace")
+        if trace_path:
+            self._attach_trace(ue, trace_path, slice_cfg)
+        self._managed_ues.add(imsi)
+
+    def _attach_trace(self, ue, path: str, slice_cfg: Dict):
+        cache_key = (path, slice_cfg.get("ue_ip") or "", float(slice_cfg.get("trace_bin", 1.0)))
+        if cache_key not in self._trace_cache:
+            try:
+                samples = load_raw_packet_csv(
+                    path,
+                    ue_ip=slice_cfg.get("ue_ip"),
+                    bin_s=slice_cfg.get("trace_bin", getattr(settings, "TRACE_BIN", 1.0)),
+                    overhead_sub_bytes=int(getattr(settings, "TRACE_OVERHEAD_BYTES", 0)),
+                )
+            except Exception as exc:
+                print(f"PRBGymEnv: failed to load trace {path}: {exc}")
+                samples = []
+            self._trace_cache[cache_key] = samples
+        samples = self._trace_cache[cache_key]
+        if not samples:
+            return
+        speed = float(slice_cfg.get("trace_speedup", getattr(settings, "TRACE_SPEEDUP", 1.0)))
+        bs = ue.current_bs
+        try:
+            if bs and hasattr(bs, "attach_dl_trace"):
+                bs.attach_dl_trace(ue.ue_imsi, samples, speed)
+            else:
+                ue.attach_trace(samples, speed)
+        except Exception as exc:
+            print(f"PRBGymEnv: failed to attach trace {path} to {ue.ue_imsi}: {exc}")
+
+    # ------------------------------------------------------------------ Observation / reward
+    def _get_state(self):
+        cell = self._target_cell()
+        if cell is None:
+            return np.zeros(self._state_dim, dtype=np.float32)
+        agg = self._aggregate_slice_metrics(cell)
+        state = []
+        slice_order = (SL_E, SL_U)
+        max_ue = float(getattr(settings, "UE_DEFAULT_MAX_COUNT", 50))
+        max_prb = max(1.0, float(getattr(cell, "max_dl_prb", 1)))
+        for sl in slice_order:
+            state.append(self._clamp01(agg[sl]["ue_count"] / max_ue))
+        for sl in slice_order:
+            state.append(self._clamp01(agg[sl]["slice_prb"] / max_prb))
+        dl_norm = max(1e-9, self.norm_dl_mbps)
+        for sl in slice_order:
+            state.append(self._clamp01(agg[sl]["tx_mbps"] / dl_norm))
+        buf_norm = max(1e-9, self.norm_buf_bytes)
+        for sl in slice_order:
+            state.append(self._clamp01(agg[sl]["buf_bytes"] / buf_norm))
+        for sl in slice_order:
+            state.append(self._clamp01(agg[sl]["prb_req"] / max_prb))
+        for sl in slice_order:
+            state.append(self._grant_ratio(agg[sl]["prb_granted"], agg[sl]["prb_req"], max_prb))
+        return np.asarray(state, dtype=np.float32)
+
+    def _aggregate_slice_metrics(self, cell):
+        quota_map = dict(getattr(cell, "slice_dl_prb_quota", {}) or {})
+        agg = {
+            SL_E: {
+                "ue_count": 0,
+                "slice_prb": float(quota_map.get(SL_E, 0.0)),
+                "tx_mbps": 0.0,
+                "buf_bytes": 0.0,
+                "prb_req": 0.0,
+                "prb_granted": 0.0,
+                "latency_sum": 0.0,
+                "latency_count": 0,
+            },
+            SL_U: {
+                "ue_count": 0,
+                "slice_prb": float(quota_map.get(SL_U, 0.0)),
+                "tx_mbps": 0.0,
+                "buf_bytes": 0.0,
+                "prb_req": 0.0,
+                "prb_granted": 0.0,
+                "latency_sum": 0.0,
+                "latency_count": 0,
+            },
+        }
+        req_map = getattr(cell, "dl_total_prb_demand", {}) or {}
+        alloc_map = getattr(cell, "prb_ue_allocation_dict", {}) or {}
+        for ue in getattr(cell, "connected_ue_list", {}).values():
+            sl = getattr(ue, "slice_type", None)
+            if sl not in agg:
+                continue
+            agg[sl]["ue_count"] += 1
+            agg[sl]["tx_mbps"] += float(getattr(ue, "served_downlink_bitrate", 0.0) or 0.0) / 1e6
+            agg[sl]["buf_bytes"] += float(getattr(ue, "dl_buffer_bytes", 0.0) or 0.0)
+            imsi = getattr(ue, "ue_imsi", None)
+            agg[sl]["prb_req"] += float(req_map.get(imsi, 0.0) or 0.0)
+            alloc = alloc_map.get(imsi, {}) or {}
+            agg[sl]["prb_granted"] += float(alloc.get("downlink", 0.0) or 0.0)
+            agg[sl]["latency_sum"] += float(getattr(ue, "downlink_latency", 0.0) or 0.0)
+            agg[sl]["latency_count"] += 1
+        return agg
+
+    def _reward(self, cell):
+        agg = self._aggregate_slice_metrics(cell)
+        scores = {}
+        for sl in (SL_E, SL_U):
+            data = agg[sl]
+            quota_raw = float(max(0.0, data["slice_prb"]))
+            demand = max(0.0, float(data["prb_req"]))
+            granted = max(0.0, float(data["prb_granted"]))
+            buf_bytes = max(0.0, float(data["buf_bytes"]))
+            tx_mbps = max(0.0, float(data["tx_mbps"]))
+            latency_avg = 0.0
+            cnt = data.get("latency_count", 0)
+            if cnt > 0:
+                latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
+
+            throughput_norm = self._clamp01(tx_mbps / max(1e-9, self.norm_dl_mbps))
+            backlog_norm = self._clamp01(buf_bytes / max(1e-9, self.norm_buf_bytes))
+            if demand <= 0.0:
+                satisfaction = 1.0 if granted <= 0.0 else self._clamp01(granted / max(1.0, quota_raw))
+            else:
+                satisfaction = self._clamp01(granted / max(1.0, demand))
+            if demand <= 0.0:
+                need_ratio = 0.0
+            elif quota_raw <= 0.0:
+                need_ratio = self.need_saturation
+            else:
+                need_ratio = demand / max(1e-6, quota_raw)
+            need = self._clamp01(need_ratio / max(1e-6, self.need_saturation))
+            oversupply = self._clamp01(max(0.0, granted - demand) / max(1.0, quota_raw))
+            idle = self._clamp01(max(0.0, quota_raw - granted) / max(1.0, quota_raw))
+
+            scores[sl] = {
+                "throughput": throughput_norm,
+                "backlog_relief": 1.0 - backlog_norm,
+                "satisfaction": satisfaction,
+                "need": need,
+                "oversupply": oversupply,
+                "idle": idle,
+                "latency": latency_avg,
+            }
+        embb = scores[SL_E]
+        embb_score = (
+            0.55 * embb["satisfaction"]
+            + 0.25 * embb["throughput"]
+            + 0.20 * embb["backlog_relief"]
+            - 0.10 * embb["oversupply"]
+        )
+        embb_score = self._clamp01(embb_score)
+        urllc = scores[SL_U]
+        buf_bits_u = agg[SL_U]["buf_bytes"] * 8.0
+        tx_bps_u = agg[SL_U]["tx_mbps"] * 1e6
+        if tx_bps_u <= 0.0:
+            delay_s = float("inf") if buf_bits_u > 0.0 else 0.0
+        else:
+            delay_s = buf_bits_u / max(1e-9, tx_bps_u)
+        gamma = max(1e-12, self.urlc_gamma_s)
+        delay_term = math.exp(-delay_s / gamma) if math.isfinite(delay_s) else 0.0
+        delay_term = self._clamp01(delay_term)
+        urllc_score = (
+            0.60 * delay_term
+            + 0.30 * urllc["satisfaction"]
+            + 0.10 * urllc["backlog_relief"]
+            - 0.05 * urllc["oversupply"]
+        )
+        urllc_score = self._clamp01(urllc_score)
+        return self.w_e * embb_score + self.w_u * urllc_score
+
+    # ------------------------------------------------------------------ Step
+    def step(self, action_idx: int):
+        cell = self._target_cell()
+        if cell is None:
+            return self._get_state(), 0.0, True, {}
+        self._apply_action(cell, action_idx)
+        reward = self._reward(cell)
+        state = self._get_state()
+        self._steps_in_episode += 1
+        done = self._steps_in_episode >= self._episode_step_limit or self._traces_consumed()
+        info = {"episode_id": self._current_episode["id"], "step": self._steps_in_episode}
+        return state, reward, done, info
+
+    def _apply_action(self, cell, action_idx: int):
+        combo = self._action_combos[int(action_idx)]
+        delta_prb = self.move_step
+        quotas = dict(getattr(cell, "slice_dl_prb_quota", {}) or {})
+        for sl in (SL_E, SL_U):
+            quotas.setdefault(sl, 0)
+        max_prb = int(getattr(cell, "max_dl_prb", 0) or 0)
+        if max_prb <= 0:
+            return
+        # Remove PRBs for negative moves first
+        for sl, sign in zip((SL_E, SL_U), combo):
+            if sign < 0:
+                reduce = min(delta_prb * abs(sign), quotas[sl])
+                quotas[sl] -= reduce
+        # Apply positive moves
+        for sl, sign in zip((SL_E, SL_U), combo):
+            if sign > 0:
+                quotas[sl] += delta_prb * sign
+        total = sum(quotas.values())
+        if total > max_prb:
+            scale = max_prb / float(max(1, total))
+            for sl in quotas:
+                quotas[sl] = int(quotas[sl] * scale)
+        cell.slice_dl_prb_quota = {k: int(max(0, v)) for k, v in quotas.items()}
+
+    # ------------------------------------------------------------------ Helpers
+    def _target_cell(self):
+        if self.sim_engine is None or not self.sim_engine.cell_list:
+            return None
+        # Use the first cell for now (single-cell training scenario)
+        return next(iter(self.sim_engine.cell_list.values()))
+
+    def _traces_consumed(self) -> bool:
+        cell = self._target_cell()
+        if cell is None or not self._managed_ues:
+            return False
+        bs = getattr(cell, "base_station", None)
+        replay = getattr(bs, "_dl_replay", None) if bs else None
+        if not replay:
+            return False
+        for imsi in self._managed_ues:
+            state = replay.get(imsi)
+            if not state:
+                continue
+            samples = state.get("samples") or []
+            idx = int(state.get("idx", 0))
+            if samples and idx < len(samples):
+                return False
+        return True
+
+    @staticmethod
+    def _clamp01(val: float) -> float:
+        return max(0.0, min(1.0, float(val)))
+
+    @staticmethod
+    def _grant_ratio(granted: float, requested: float, max_prb: float) -> float:
+        if requested <= 0.0:
+            return 1.0 if granted <= 0.0 else max(0.0, min(1.0, granted / max_prb))
+        return max(0.0, min(1.0, granted / max(1.0, requested)))
+
+
+class xAppGymPRBAllocator(xAppBase):
+    """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic)."""
+
+    def __init__(self, ric=None):
+        super().__init__(ric=ric)
+        self.enabled = getattr(settings, "PRB_GYM_ENABLE", False)
+        if not self.enabled:
+            return
+        if not TORCH_AVAILABLE:
+            print(f"{self.xapp_id}: torch is required; disabling.")
+            self.enabled = False
+            return
+
+        self.env = PRBGymEnv(ric)
+        if not self.env._episodes:
+            print(f"{self.xapp_id}: no episodes configured; disable via --prb-gym-config.")
+            self.enabled = False
+            return
+        self.state_dim = self.env._state_dim
+        self.n_actions = len(self.env._action_combos)
+        self.gamma = float(getattr(settings, "DQN_PRB_GAMMA", 0.99))
+        self.lr = float(getattr(settings, "DQN_PRB_LR", 1e-3))
+        self.batch = int(getattr(settings, "DQN_PRB_BATCH", 64))
+        self.buffer_cap = int(getattr(settings, "DQN_PRB_BUFFER", 100000))
+        self.eps_start = float(getattr(settings, "DQN_PRB_EPSILON_START", 1.0))
+        self.eps_end = float(getattr(settings, "DQN_PRB_EPSILON_END", 0.05))
+        self.eps_decay = int(getattr(settings, "DQN_PRB_EPSILON_DECAY", 20000))
+        self.target_sync = max(1, int(getattr(settings, "DQN_PRB_TARGET_UPDATE", 200)))
+        self.save_interval = int(getattr(settings, "DQN_PRB_SAVE_INTERVAL", 0))
+        self.train_max_steps = max(0, int(getattr(settings, "DQN_PRB_MAX_TRAIN_STEPS", 0)))
+
+        self.device = self._select_device()
+        self.q = _DQN(self.state_dim, self.n_actions).to(self.device)
+        self.q_target = _DQN(self.state_dim, self.n_actions).to(self.device)
+        self.q_target.load_state_dict(self.q.state_dict())
+        self.opt = optim.Adam(self.q.parameters(), lr=self.lr)
+        self.replay = _ReplayBuffer(self.buffer_cap)
+        self.timestep = 0
+        self.last_state = None
+        self.last_action = None
+        self.last_reward = None
+        self.last_done = False
+        self._last_loss = None
+        self._action_counts = defaultdict(int)
+        self._tb = None
+        self._tb_interval = max(1, int(getattr(settings, "DQN_PRB_LOG_INTERVAL", 1)))
+        self._setup_tensorboard()
+
+    def start(self):
+        if not self.enabled:
+            return
+        self.last_state = self.env.reset()
+        print(f"{self.xapp_id}: enabled (state_dim={self.state_dim}, actions={self.n_actions})")
+
+    def step(self):
+        if not self.enabled or self.last_state is None:
+            return
+        sim_engine = getattr(self.ric, "simulation_engine", None)
+        if sim_engine is None:
+            return
+        sim_step = getattr(sim_engine, "sim_step", 0)
+        if (self.env.period_steps > 1) and (sim_step % self.env.period_steps != 0):
+            return
+        if self.train_max_steps > 0 and self.timestep >= self.train_max_steps:
+            self.enabled = False
+            print(f"{self.xapp_id}: reached max train steps; shutting down.")
+            return
+
+        self.timestep += 1
+        action = self._select_action(self.last_state)
+        self._action_counts[action] += 1
+        next_state, reward, done, _ = self.env.step(action)
+        self.replay.push(self.last_state, action, reward, next_state, float(done))
+        loss = self._optimize()
+        if loss is not None:
+            self._last_loss = loss
+        if self._tb is not None and (self.timestep % self._tb_interval) == 0:
+            self._log_tb(reward, self._epsilon(), self._last_loss)
+        self.last_state = next_state if not done else self.env.reset()
+        self.last_done = done
+
+    # ------------------------------------------------------------------ DQN helpers
+    def _select_action(self, state):
+        eps = self._epsilon()
+        if random.random() < eps:
+            return random.randrange(self.n_actions)
+        with torch.no_grad():
+            s = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
+            q_vals = self.q(s)
+            return int(torch.argmax(q_vals, dim=1).item())
+
+    def _epsilon(self):
+        if self.eps_decay <= 0:
+            return self.eps_end
+        frac = min(1.0, self.timestep / float(self.eps_decay))
+        return self.eps_start + (self.eps_end - self.eps_start) * frac
+
+    def _optimize(self):
+        if len(self.replay) < max(32, self.batch):
+            return None
+        states, actions, rewards, next_states, dones = self.replay.sample(self.batch)
+        states = states.to(self.device)
+        actions = actions.to(self.device)
+        rewards = rewards.to(self.device)
+        next_states = next_states.to(self.device)
+        dones = dones.to(self.device)
+
+        q_pred = self.q(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        with torch.no_grad():
+            q_next = self.q_target(next_states).max(1)[0]
+            q_target_val = rewards + (1.0 - dones) * self.gamma * q_next
+        loss = F.mse_loss(q_pred, q_target_val)
+        self.opt.zero_grad()
+        loss.backward()
+        self.opt.step()
+        if self.timestep % self.target_sync == 0:
+            self.q_target.load_state_dict(self.q.state_dict())
+        return float(loss.item())
+
+    def _select_device(self):
+        pref = (getattr(settings, "DQN_PRB_DEVICE", "auto") or "auto").lower()
+        if pref == "cpu":
+            return torch.device("cpu")
+        if pref.startswith("cuda"):
+            if torch.cuda.is_available():
+                return torch.device(pref)
+            print(f"{self.xapp_id}: requested {pref} but CUDA not available; falling back to CPU.")
+            return torch.device("cpu")
+        # auto
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        return torch.device("cpu")
+
+    def _setup_tensorboard(self):
+        self._run_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if not getattr(settings, "DQN_TB_ENABLE", False):
+            return
+        base = getattr(settings, "DQN_TB_DIR", "backend/tb_logs")
+        logdir = os.path.join(base, f"prb_gym_{self._run_stamp}")
+        try:
+            from torch.utils.tensorboard import SummaryWriter
+
+            os.makedirs(logdir, exist_ok=True)
+            self._tb = SummaryWriter(log_dir=logdir)
+            print(f"{self.xapp_id}: TensorBoard logging to {logdir}")
+        except Exception as exc:
+            print(f"{self.xapp_id}: TensorBoard unavailable ({exc}); continuing without logging.")
+            self._tb = None
+
+    def _log_tb(self, reward: float, epsilon: float, loss: Optional[float]):
+        if self._tb is None:
+            return
+        try:
+            self._tb.add_scalar("train/reward", float(reward), self.timestep)
+            self._tb.add_scalar("train/epsilon", float(epsilon), self.timestep)
+            if loss is not None:
+                self._tb.add_scalar("train/loss", float(loss), self.timestep)
+            if self.timestep % (self._tb_interval * 10) == 0:
+                counts = [self._action_counts.get(i, 0) for i in range(self.n_actions)]
+                self._tb.add_histogram("actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
+        except Exception:
+            pass
+
+    def __del__(self):
+        try:
+            if self._tb is not None:
+                self._tb.flush()
+                self._tb.close()
+        except Exception:
+            pass

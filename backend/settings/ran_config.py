@@ -260,6 +260,13 @@ DQN_TB_DIR = os.getenv("DQN_TB_DIR", "backend/tb_logs")
 DQN_WANDB_ENABLE = os.getenv("DQN_WANDB_ENABLE", "0") in ("1", "true", "True")
 DQN_WANDB_PROJECT = os.getenv("DQN_WANDB_PROJECT", "ai-ran-dqn")
 DQN_WANDB_RUNNAME = os.getenv("DQN_WANDB_RUNNAME", "")
+DQN_PRB_EPISODIC_ENABLE = os.getenv("DQN_PRB_EPISODIC_ENABLE", "0") in ("1", "true", "True")
+DQN_EPISODE_LOOP = os.getenv("DQN_EPISODE_LOOP", "0") in ("1", "true", "True")
+DQN_EPISODE_CONFIG_PATH = os.getenv("DQN_EPISODE_CONFIG_PATH", "")
+DQN_EPISODE_CONFIG_JSON = os.getenv("DQN_EPISODE_CONFIG_JSON", "")
+PRB_GYM_ENABLE = os.getenv("PRB_GYM_ENABLE", "0") in ("1", "true", "True")
+PRB_GYM_CONFIG_PATH = os.getenv("PRB_GYM_CONFIG_PATH", "")
+PRB_GYM_LOOP = os.getenv("PRB_GYM_LOOP", "0") in ("1", "true", "True")
 
 
 RAN_TOPOLOGY_PRESET = os.getenv("RAN_TOPOLOGY_PRESET", "default")  # 'default' or 'simple'

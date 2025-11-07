@@ -126,6 +126,26 @@ parser.add_argument("--dqn-wandb", action="store_true", help="Enable Weights & B
 parser.add_argument("--dqn-wandb-project", type=str, help="W&B project name")
 parser.add_argument("--dqn-wandb-name", type=str, help="W&B run name")
 parser.add_argument(
+    "--dqn-prb-episodic",
+    action="store_true",
+    help="Enable episodic variant of the DQN PRB allocator",
+)
+parser.add_argument(
+    "--dqn-episode-config",
+    type=str,
+    help="Path to a JSON file describing episodic UE/trace configurations",
+)
+parser.add_argument(
+    "--dqn-episode-config-json",
+    type=str,
+    help="Inline JSON blob describing episodic configurations (alternative to --dqn-episode-config)",
+)
+parser.add_argument(
+    "--dqn-episode-loop",
+    action="store_true",
+    help="Loop episodic scenarios instead of stopping after the last one",
+)
+parser.add_argument(
     "--dqn-episode-len",
     type=int,
     help="Pseudo-episode length (steps) for DQN PRB allocator; 0 disables windowing",
@@ -141,6 +161,10 @@ parser.add_argument("--sb3-dqn-model", type=str, help="Path to load/save SB3 DQN
 parser.add_argument("--sb3-dqn-total-steps", type=int, help="Nominal total steps for SB3 progress schedule")
 parser.add_argument("--sb3-dqn-target-update", type=int, help="Target network update interval for SB3 DQN")
 parser.add_argument("--sb3-dqn-save-interval", type=int, help="Autosave interval (steps) for SB3 DQN model")
+# Gym-style PRB allocator
+parser.add_argument("--prb-gym", action="store_true", help="Enable Gym-style PRB allocator xApp")
+parser.add_argument("--prb-gym-config", type=str, help="Episode config JSON for the Gym-style PRB xApp")
+parser.add_argument("--prb-gym-loop", action="store_true", help="Loop the Gym-style episode catalog")
 # Trace replay options
 parser.add_argument(
     "--trace-speedup",
@@ -324,6 +348,14 @@ if args.dqn_wandb_project:
     os.environ["DQN_WANDB_PROJECT"] = args.dqn_wandb_project
 if args.dqn_wandb_name:
     os.environ["DQN_WANDB_RUNNAME"] = args.dqn_wandb_name
+if args.dqn_prb_episodic:
+    os.environ["DQN_PRB_EPISODIC_ENABLE"] = "1"
+if args.dqn_episode_config:
+    os.environ["DQN_EPISODE_CONFIG_PATH"] = args.dqn_episode_config
+if args.dqn_episode_config_json:
+    os.environ["DQN_EPISODE_CONFIG_JSON"] = args.dqn_episode_config_json
+if args.dqn_episode_loop:
+    os.environ["DQN_EPISODE_LOOP"] = "1"
 
 # SB3 DQN env exports
 if args.sb3_dqn_prb:
@@ -336,6 +368,13 @@ if args.sb3_dqn_target_update is not None:
     os.environ["SB3_DQN_TARGET_UPDATE"] = str(args.sb3_dqn_target_update)
 if args.sb3_dqn_save_interval is not None:
     os.environ["SB3_DQN_SAVE_INTERVAL"] = str(args.sb3_dqn_save_interval)
+# Gym-style xApp env exports
+if args.prb_gym:
+    os.environ["PRB_GYM_ENABLE"] = "1"
+if args.prb_gym_config:
+    os.environ["PRB_GYM_CONFIG_PATH"] = args.prb_gym_config
+if args.prb_gym_loop:
+    os.environ["PRB_GYM_LOOP"] = "1"
 
 # Trace mapping and options (export via env before importing settings)
 if args.trace_speedup is not None:

@@ -64,7 +64,7 @@ if TORCH_AVAILABLE:
         and supports random mini‑batch sampling.
         """
         def __init__(self, capacity: int = 50000):
-            self.buf = deque(maxlen=int(capacity))  # fixed‑size circular buffer
+            self.buf = deque(maxlen=capacity)
 
         def push(self, s, a, r, ns, d, extra=None):
             self.buf.append((s, a, r, ns, d, extra))
@@ -180,10 +180,11 @@ class xAppDQNPRBAllocator(xAppBase):
     - _log(): emits metrics to TB/W&B
     """
 
-    def __init__(self, ric=None):
+    def __init__(self, ric=None, force_enable: bool = False):
         super().__init__(ric=ric)
         simple_enabled = getattr(settings, "DQN_PRB_SIMPLE_ENABLE", False)
-        self.enabled = getattr(settings, "DQN_PRB_ENABLE", False) and not simple_enabled  # on/off toggle
+        base_flag = getattr(settings, "DQN_PRB_ENABLE", False)
+        self.enabled = (force_enable or base_flag) and not simple_enabled  # on/off toggle
         if getattr(settings, "DQN_PRB_ENABLE", False) and simple_enabled:
             print(f"{self.xapp_id}: skipped because DQN_PRB_SIMPLE_ENABLE=1 (using simplified variant).")
 

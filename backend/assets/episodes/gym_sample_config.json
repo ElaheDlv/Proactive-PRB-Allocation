@@ -1,0 +1,50 @@
+{
+  "episodes": [
+    {
+      "id": "embb-heavy",
+      "duration_steps": 800,
+      "initial_prb": {
+        "eMBB": 60,
+        "URLLC": 20
+      },
+      "freeze_mobility": true,
+      "slices": {
+        "eMBB": {
+          "ue_count": 2,
+          "trace": "backend/assets/New_traces/eMBB_M2_aligned_trace.csv",
+          "ue_ip": "172.30.1.250",
+          "trace_speedup": 1.0
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/assets/New_traces/URLLC_M1_aligned_trace.csv",
+          "ue_ip": "172.30.1.250",
+          "trace_speedup": 1.0
+        }
+      }
+    },
+    {
+      "id": "urllc-bursty",
+      "duration_steps": 600,
+      "initial_prb": {
+        "eMBB": 30,
+        "URLLC": 30
+      },
+      "freeze_mobility": true,
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv",
+          "ue_ip": "172.30.1.250",
+          "trace_speedup": 1.2
+        },
+        "URLLC": {
+          "ue_count": 2,
+          "trace": "backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv",
+          "ue_ip": "172.30.1.250",
+          "trace_speedup": 1.0
+        }
+      }
+    }
+  ]
+}
