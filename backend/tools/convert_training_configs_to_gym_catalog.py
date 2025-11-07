@@ -16,7 +16,7 @@ import json
 import math
 from pathlib import Path
 
-import settings
+import os
 
 
 def parse_args():
@@ -39,6 +39,18 @@ def parse_args():
         type=float,
         default=1.0,
         help="Optional speedup factor to apply to all traces (mirrors TRACE_SPEEDUP)",
+    )
+    parser.add_argument(
+        "--sim-step",
+        type=float,
+        default=None,
+        help="Override SIM_STEP_TIME_DEFAULT (seconds). Defaults to env or 1.0.",
+    )
+    parser.add_argument(
+        "--decision-period",
+        type=int,
+        default=None,
+        help="Override DQN_PRB_DECISION_PERIOD_STEPS. Defaults to env or 1.",
     )
     return parser.parse_args()
 
@@ -67,11 +79,11 @@ def trace_duration_seconds(path: Path) -> float:
         return 0.0
 
 
-def duration_steps(duration_s: float) -> int:
-    sim_step = float(getattr(settings, "SIM_STEP_TIME_DEFAULT", 1.0))
-    decision_period = max(1, int(getattr(settings, "DQN_PRB_DECISION_PERIOD_STEPS", 1)))
-    seconds_per_decision = max(1e-9, sim_step * decision_period)
-    return max(1, math.ceil(duration_s / seconds_per_decision))
+def seconds_per_decision(args) -> float:
+    sim_step = args.sim_step if args.sim_step is not None else float(os.getenv("SIM_STEP_TIME_DEFAULT", "1.0"))
+    decision_period = args.decision_period if args.decision_period is not None else int(os.getenv("DQN_PRB_DECISION_PERIOD_STEPS", "1"))
+    decision_period = max(1, decision_period)
+    return max(1e-9, sim_step * decision_period)
 
 
 def main():
@@ -79,6 +91,7 @@ def main():
     input_path = Path(args.input)
     trace_root = Path(args.trace_root)
     output_path = Path(args.output)
+    spd = seconds_per_decision(args)
 
     with input_path.open("r", encoding="utf-8") as fp:
         configs = json.load(fp)
@@ -97,7 +110,8 @@ def main():
         if duration_s <= 0.0:
             steps = args.duration_fallback
         else:
-            steps = duration_steps(duration_s / max(1e-9, args.trace_speedup))
+            effective = duration_s / max(1e-9, args.trace_speedup)
+            steps = max(1, math.ceil(effective / spd))
 
         episodes.append(
             {

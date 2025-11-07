@@ -6,8 +6,11 @@ from settings import (
     NETWORK_SLICES,
     NETWORK_SLICE_EMBB_NAME,
     NETWORK_SLICE_URLLC_NAME,
-    NETWORK_SLICE_MTC_NAME,
 )
+try:
+    from settings import NETWORK_SLICE_MTC_NAME
+except ImportError:
+    NETWORK_SLICE_MTC_NAME = None
 
 import inspect
 from network_layer.ue import UE
@@ -275,19 +278,27 @@ def ue_time_remaining_explainer(sim, knowledge_router, query_key, params):
     ],
 )
 def ue_slice_type_explainer(sim, knowledge_router, query_key, params):
-    return f"""
+    mmtc_section = ""
+    if NETWORK_SLICE_MTC_NAME and NETWORK_SLICE_MTC_NAME in NETWORK_SLICES:
+        mmtc_section = (
+            f"* mMTC (Massive Machine Type Communication): Designed for applications with a large number of low-power devices, such as IoT sensors.\n"
+            f"    corresponding QoS profile: {json.dumps(NETWORK_SLICES[NETWORK_SLICE_MTC_NAME])}\n"
+        )
+    return (
+        f"""
 The UE's slice type is randomly selected during the authentication and registration process, 
 which can be one of the following:
 * eMBB (Enhanced Mobile Broadband): Designed to provide high data rates and capacity for applications like video streaming.
     corresponding QoS profile: {json.dumps(NETWORK_SLICES[NETWORK_SLICE_EMBB_NAME])}
 * URLLC (Ultra-Reliable Low Latency Communication): Designed for applications requiring ultra-reliable and low-latency communication, such as autonomous driving.
     corresponding QoS profile: {json.dumps(NETWORK_SLICES[NETWORK_SLICE_URLLC_NAME])}
-* mMTC (Massive Machine Type Communication): Designed for applications with a large number of low-power devices, such as IoT sensors.
-    corresponding QoS profile: {json.dumps(NETWORK_SLICES[NETWORK_SLICE_MTC_NAME])}
-
+"""
+        + mmtc_section
+        + """
 When the UE picks up a slice type, it will also get the corresponding QoS profile 
 (query /user_equipments/attribute/qos_profile for more details).
 """
+    )
 
 
 @knowledge_entry(
