@@ -556,21 +556,6 @@ Each entry in `backend/assets/episodes/sample_config.json` demonstrates the sche
 
 At the start of each episode the xApp clears any auto-spawned UEs, spawns the requested groups, attaches their traces directly at the gNB, resets the replay buffer queues, and runs for `duration_steps` decisions. The last transition in the episode is flagged with `done=True` so the replay buffer learns from terminal rollouts. When an episode finishes the simulator is reset automatically and the next scenario loads—no dashboard/front-end required for training loops.
 
-#### Gym-style two-slice xApp
-
-Need a clean-room agent that only controls eMBB and URLLC? Enable the Gym-flavoured PRB allocator:
-
-```bash
-python backend/main.py --preset simple --mode headless \
-  --prb-gym --prb-gym-config backend/assets/episodes/gym_sample_config.json \
-  --dqn-train --dqn-period 1 --dqn-move-step 2
-```
-
-- Two slices only, so the action space shrinks to 9 combinations (`{-1,0,+1}` deltas for eMBB/URLLC) and the state vector keeps the same KPIs per slice without any mMTC entries.
-- Episodes come from JSON (`backend/assets/episodes/gym_sample_config.json` shows the schema): specify UE counts per slice, the shared trace each slice replays (all UEs in a slice use the same file), playback speed/bin size, initial PRB quotas, whether mobility is frozen, and how many DQN decisions the episode should last.
-- The xApp embeds a Gym-like environment (`reset`/`step` returning `(state, reward, done, info)`) so terminal conditions are explicit. Toggle `--prb-gym-loop` to cycle through the scenario list indefinitely.
-- Hyper-parameters still reuse the existing `--dqn-*` flags/env vars, so you can tune learning rate, epsilon schedule, replay size, etc., exactly as before.
-
 To point the React frontend at a specific backend instance, set these environment variables when launching `npm run dev` (or create a `frontend/.env.local`):
 
 ```bash
