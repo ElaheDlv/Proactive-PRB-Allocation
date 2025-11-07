@@ -41,13 +41,17 @@ except Exception:
 
 
 class _ReplayBuffer:
+    """Simple FIFO replay buffer storing (s, a, r, s', done) tuples."""
+
     def __init__(self, capacity: int = 100000):
         self.buf = deque(maxlen=capacity)
 
     def push(self, s, a, r, ns, d):
+        """Append a new transition to the buffer."""
         self.buf.append((s, a, r, ns, d))
 
     def sample(self, batch_size):
+        """Randomly sample a mini-batch (without replacement)."""
         batch_size = min(batch_size, len(self.buf))
         idx = np.random.choice(len(self.buf), batch_size, replace=False)
         states, actions, rewards, next_states, dones = zip(*[self.buf[i] for i in idx])
@@ -66,6 +70,7 @@ class _ReplayBuffer:
 class _DQN(nn.Module):
     def __init__(self, in_dim: int, out_dim: int):
         super().__init__()
+        # Two-hidden-layer MLP used when model_arch=mlp
         self.net = nn.Sequential(
             nn.Linear(in_dim, 256),
             nn.ReLU(),
@@ -78,10 +83,29 @@ class _DQN(nn.Module):
         return self.net(x)
 
 
+class _LSTMDQN(nn.Module):
+    def __init__(self, in_dim: int, hidden_dim: int, out_dim: int):
+        super().__init__()
+        # LSTM encodes the last seq_len states before feeding a small head
+        self.lstm = nn.LSTM(input_size=in_dim, hidden_size=hidden_dim, batch_first=True)
+        self.head = nn.Sequential(
+            nn.Linear(hidden_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, out_dim),
+        )
+
+    def forward(self, x):
+        # x: [batch, seq_len, in_dim]
+        out, _ = self.lstm(x)
+        feat = out[:, -1, :]
+        return self.head(feat)
+
+
 class PRBGymEnv:
     """Minimal Gym-like environment that exposes reset/step for PRB allocation."""
 
     def __init__(self, ric):
+        """Initialise environment and pull tunables from global settings."""
         self.ric = ric
         self.sim_engine = getattr(ric, "simulation_engine", None)
         self.period_steps = max(1, int(getattr(settings, "DQN_PRB_DECISION_PERIOD_STEPS", 1)))
@@ -103,9 +127,11 @@ class PRBGymEnv:
         self._trace_cache: Dict[Tuple[str, str, float], List[Tuple[float, float, float]]] = {}
         self._action_combos = list(product([-1, 0, 1], repeat=2))
         self._state_dim = 12
+        self._catalog_done = False
 
     # ------------------------------------------------------------------ Episode control
     def _load_episode_specs(self) -> List[Dict]:
+        """Load/normalise the episode catalog described in PRB_GYM_CONFIG_PATH."""
         path = getattr(settings, "PRB_GYM_CONFIG_PATH", "").strip()
         if not path:
             return []
@@ -129,6 +155,7 @@ class PRBGymEnv:
         return specs
 
     def _normalize_episode(self, entry, idx: int) -> Optional[Dict]:
+        """Validate a raw episode dict; return None if it is incomplete."""
         if not isinstance(entry, dict):
             return None
         duration = int(entry.get("duration_steps", 0))
@@ -157,6 +184,7 @@ class PRBGymEnv:
         }
 
     def _normalize_slice_cfg(self, cfg) -> Optional[Dict]:
+        """Ensure per-slice config contains UE count and optional trace metadata."""
         if not isinstance(cfg, dict):
             return None
         count = int(cfg.get("ue_count", 0))
@@ -171,15 +199,18 @@ class PRBGymEnv:
         }
 
     def reset(self):
+        """Reset the simulator to the next episode and return the initial observation."""
         if not self._episodes or self.sim_engine is None:
+            return None
+        if self._catalog_done:
             return None
         next_idx = self._episode_idx + 1
         if next_idx >= len(self._episodes):
             if not self._episode_loop:
-                print("PRBGymEnv: episode catalog exhausted; staying on last state.")
-                next_idx = len(self._episodes) - 1
-            else:
-                next_idx = 0
+                print("PRBGymEnv: episode catalog exhausted; stopping further resets.")
+                self._catalog_done = True
+                return None
+            next_idx = 0
         self._episode_idx = next_idx
         self._current_episode = self._episodes[next_idx]
         self._episode_step_limit = self._current_episode["duration_steps"]
@@ -188,6 +219,7 @@ class PRBGymEnv:
         return self._get_state()
 
     def _deploy_episode(self, spec: Dict):
+        """Apply PRB quotas and spawn the scripted UE population for an episode."""
         self._clear_managed_ues()
         self._apply_initial_prb(spec.get("initial_prb", {}))
         for slice_name in (SL_E, SL_U):
@@ -197,6 +229,7 @@ class PRBGymEnv:
                 self._register_episode_ue(imsi, slice_name, cfg)
 
     def _clear_managed_ues(self):
+        """Remove every UE from the simulator to ensure a deterministic start state."""
         if self.sim_engine is None:
             return
         for imsi in list(self.sim_engine.ue_list.keys()):
@@ -204,6 +237,7 @@ class PRBGymEnv:
         self._managed_ues.clear()
 
     def _apply_initial_prb(self, prb_map: Dict[str, int]):
+        """Set initial slice quotas on every cell, normalising to the cell budget."""
         if self.sim_engine is None:
             return
         for cell in self.sim_engine.cell_list.values():
@@ -219,6 +253,7 @@ class PRBGymEnv:
             cell.slice_dl_prb_quota = quotas
 
     def _register_episode_ue(self, imsi: str, slice_name: str, slice_cfg: Dict):
+        """Spawn a scripted UE, optionally pinning mobility and attaching traces."""
         if self.sim_engine is None:
             return
         ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
@@ -239,6 +274,7 @@ class PRBGymEnv:
         self._managed_ues.add(imsi)
 
     def _attach_trace(self, ue, path: str, slice_cfg: Dict):
+        """Attach (and cache) a trace for a UE belonging to a slice."""
         cache_key = (path, slice_cfg.get("ue_ip") or "", float(slice_cfg.get("trace_bin", 1.0)))
         if cache_key not in self._trace_cache:
             try:
@@ -251,7 +287,17 @@ class PRBGymEnv:
             except Exception as exc:
                 print(f"PRBGymEnv: failed to load trace {path}: {exc}")
                 samples = []
+            # Cache the parsed samples so we don't re-read/parse the same
+            # trace file repeatedly (many UEs or repeated episodes). The
+            # cache key includes path, UE IP and bin size so different
+            # variants are stored separately.
+            # Storing an empty list on failure prevents repeated load attempts
+            # and noisy logging for the same missing/invalid trace. The
+            # caller will check for an empty samples list and skip attaching
+            # the trace when appropriate.
             self._trace_cache[cache_key] = samples
+        # Retrieve cached samples (either freshly loaded above or present
+        # from a previous call).
         samples = self._trace_cache[cache_key]
         if not samples:
             return
@@ -267,6 +313,7 @@ class PRBGymEnv:
 
     # ------------------------------------------------------------------ Observation / reward
     def _get_state(self):
+        """Build the observation vector (12 elements) from the single training cell."""
         cell = self._target_cell()
         if cell is None:
             return np.zeros(self._state_dim, dtype=np.float32)
@@ -292,6 +339,7 @@ class PRBGymEnv:
         return np.asarray(state, dtype=np.float32)
 
     def _aggregate_slice_metrics(self, cell):
+        """Aggregate per-slice KPIs used for both the state vector and reward."""
         quota_map = dict(getattr(cell, "slice_dl_prb_quota", {}) or {})
         agg = {
             SL_E: {
@@ -333,6 +381,7 @@ class PRBGymEnv:
         return agg
 
     def _reward(self, cell):
+        """Compute the scalar reward as weighted eMBB/URLLC slice scores."""
         agg = self._aggregate_slice_metrics(cell)
         scores = {}
         for sl in (SL_E, SL_U):
@@ -404,15 +453,16 @@ class PRBGymEnv:
         cell = self._target_cell()
         if cell is None:
             return self._get_state(), 0.0, True, {}
-        self._apply_action(cell, action_idx)
-        reward = self._reward(cell)
-        state = self._get_state()
+        self._apply_action(cell, action_idx)  # mutate slice quotas
+        reward = self._reward(cell)           # compute shaped reward
+        state = self._get_state()             # observe next state
         self._steps_in_episode += 1
         done = self._steps_in_episode >= self._episode_step_limit or self._traces_consumed()
         info = {"episode_id": self._current_episode["id"], "step": self._steps_in_episode}
         return state, reward, done, info
 
     def _apply_action(self, cell, action_idx: int):
+        """Translate a discrete action into PRB adjustments for both slices."""
         combo = self._action_combos[int(action_idx)]
         delta_prb = self.move_step
         quotas = dict(getattr(cell, "slice_dl_prb_quota", {}) or {})
@@ -439,12 +489,14 @@ class PRBGymEnv:
 
     # ------------------------------------------------------------------ Helpers
     def _target_cell(self):
+        """Return the single cell we train on (first entry in the simulator)."""
         if self.sim_engine is None or not self.sim_engine.cell_list:
             return None
         # Use the first cell for now (single-cell training scenario)
         return next(iter(self.sim_engine.cell_list.values()))
 
     def _traces_consumed(self) -> bool:
+        """Return True if every managed UE has replayed its trace to completion."""
         cell = self._target_cell()
         if cell is None or not self._managed_ues:
             return False
@@ -474,7 +526,12 @@ class PRBGymEnv:
 
 
 class xAppGymPRBAllocator(xAppBase):
-    """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic)."""
+    """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic).
+
+    This xApp wraps the simulator inside a Gym-like environment (reset/step) and
+    trains a DQN (MLP or LSTM) to move PRBs between two slices. It owns the
+    entire training loop, so it does not rely on the legacy PRB allocator code.
+    """
 
     def __init__(self, ric=None):
         super().__init__(ric=ric)
@@ -503,10 +560,13 @@ class xAppGymPRBAllocator(xAppBase):
         self.target_sync = max(1, int(getattr(settings, "DQN_PRB_TARGET_UPDATE", 200)))
         self.save_interval = int(getattr(settings, "DQN_PRB_SAVE_INTERVAL", 0))
         self.train_max_steps = max(0, int(getattr(settings, "DQN_PRB_MAX_TRAIN_STEPS", 0)))
+        self.model_arch = getattr(settings, "DQN_PRB_MODEL_ARCH", "mlp").lower()
+        self.seq_len = max(1, int(getattr(settings, "DQN_PRB_SEQ_LEN", 1)))
+        self.seq_hidden = int(getattr(settings, "DQN_PRB_SEQ_HIDDEN", 128))
+        self.is_lstm = self.model_arch == "lstm"
 
         self.device = self._select_device()
-        self.q = _DQN(self.state_dim, self.n_actions).to(self.device)
-        self.q_target = _DQN(self.state_dim, self.n_actions).to(self.device)
+        self.q, self.q_target = self._build_models()
         self.q_target.load_state_dict(self.q.state_dict())
         self.opt = optim.Adam(self.q.parameters(), lr=self.lr)
         self.replay = _ReplayBuffer(self.buffer_cap)
@@ -520,20 +580,29 @@ class xAppGymPRBAllocator(xAppBase):
         self._tb = None
         self._tb_interval = max(1, int(getattr(settings, "DQN_PRB_LOG_INTERVAL", 1)))
         self._setup_tensorboard()
+        self._state_window: deque = deque(maxlen=self.seq_len)
 
     def start(self):
+        """Reset the environment and print a short banner."""
         if not self.enabled:
             return
-        self.last_state = self.env.reset()
+        raw_state = self.env.reset()
+        if raw_state is None:
+            print(f"{self.xapp_id}: no episodes available; disabling.")
+            self.enabled = False
+            return
+        self.last_state = self._encode_state(raw_state, reset=True)
         print(f"{self.xapp_id}: enabled (state_dim={self.state_dim}, actions={self.n_actions})")
 
     def step(self):
+        """Main training loop hook invoked by the simulator every sim step."""
         if not self.enabled or self.last_state is None:
             return
         sim_engine = getattr(self.ric, "simulation_engine", None)
         if sim_engine is None:
             return
         sim_step = getattr(sim_engine, "sim_step", 0)
+        # Only act every `period_steps` ticks to match radio scheduling cadence.
         if (self.env.period_steps > 1) and (sim_step % self.env.period_steps != 0):
             return
         if self.train_max_steps > 0 and self.timestep >= self.train_max_steps:
@@ -544,40 +613,55 @@ class xAppGymPRBAllocator(xAppBase):
         self.timestep += 1
         action = self._select_action(self.last_state)
         self._action_counts[action] += 1
-        next_state, reward, done, _ = self.env.step(action)
+        next_state_raw, reward, done, _ = self.env.step(action)
+        next_state = self._encode_state(next_state_raw, reset=False)
         self.replay.push(self.last_state, action, reward, next_state, float(done))
         loss = self._optimize()
         if loss is not None:
             self._last_loss = loss
         if self._tb is not None and (self.timestep % self._tb_interval) == 0:
             self._log_tb(reward, self._epsilon(), self._last_loss)
-        self.last_state = next_state if not done else self.env.reset()
+        if done:
+            reset_obs = self.env.reset()
+            if reset_obs is None:
+                print(f"{self.xapp_id}: episode catalog finished; stopping training.")
+                self.enabled = False
+                return
+            self.last_state = self._encode_state(reset_obs, reset=True)
+        else:
+            self.last_state = next_state
         self.last_done = done
 
     # ------------------------------------------------------------------ DQN helpers
     def _select_action(self, state):
+        """ε-greedy action selection."""
         eps = self._epsilon()
         if random.random() < eps:
             return random.randrange(self.n_actions)
         with torch.no_grad():
-            s = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
+            if self.is_lstm:
+                s = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
+            else:
+                s = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
             q_vals = self.q(s)
             return int(torch.argmax(q_vals, dim=1).item())
 
     def _epsilon(self):
+        """Linear epsilon decay schedule."""
         if self.eps_decay <= 0:
             return self.eps_end
         frac = min(1.0, self.timestep / float(self.eps_decay))
         return self.eps_start + (self.eps_end - self.eps_start) * frac
 
     def _optimize(self):
+        """One SGD step on a sampled replay mini-batch."""
         if len(self.replay) < max(32, self.batch):
             return None
         states, actions, rewards, next_states, dones = self.replay.sample(self.batch)
-        states = states.to(self.device)
+        states = self._to_tensor(states)
         actions = actions.to(self.device)
         rewards = rewards.to(self.device)
-        next_states = next_states.to(self.device)
+        next_states = self._to_tensor(next_states)
         dones = dones.to(self.device)
 
         q_pred = self.q(states).gather(1, actions.unsqueeze(1)).squeeze(1)
@@ -593,6 +677,7 @@ class xAppGymPRBAllocator(xAppBase):
         return float(loss.item())
 
     def _select_device(self):
+        """Choose runtime device based on DQN_PRB_DEVICE preference."""
         pref = (getattr(settings, "DQN_PRB_DEVICE", "auto") or "auto").lower()
         if pref == "cpu":
             return torch.device("cpu")
@@ -606,7 +691,18 @@ class xAppGymPRBAllocator(xAppBase):
             return torch.device("cuda")
         return torch.device("cpu")
 
+    def _build_models(self):
+        """Instantiate policy and target networks (MLP or LSTM)."""
+        if self.is_lstm:
+            q = _LSTMDQN(self.state_dim, self.seq_hidden, self.n_actions).to(self.device)
+            q_target = _LSTMDQN(self.state_dim, self.seq_hidden, self.n_actions).to(self.device)
+        else:
+            q = _DQN(self.state_dim, self.n_actions).to(self.device)
+            q_target = _DQN(self.state_dim, self.n_actions).to(self.device)
+        return q, q_target
+
     def _setup_tensorboard(self):
+        """Initialise TensorBoard logging if enabled."""
         self._run_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if not getattr(settings, "DQN_TB_ENABLE", False):
             return
@@ -623,6 +719,7 @@ class xAppGymPRBAllocator(xAppBase):
             self._tb = None
 
     def _log_tb(self, reward: float, epsilon: float, loss: Optional[float]):
+        """Write scalar metrics / histograms to TensorBoard."""
         if self._tb is None:
             return
         try:
@@ -637,9 +734,33 @@ class xAppGymPRBAllocator(xAppBase):
             pass
 
     def __del__(self):
+        """Best-effort cleanup for the TB writer."""
         try:
             if self._tb is not None:
                 self._tb.flush()
                 self._tb.close()
         except Exception:
             pass
+
+    # ------------------------------------------------------------------ State encoding helpers
+    def _encode_state(self, raw_state, reset: bool = False):
+        """Return either the raw vector (MLP) or a `[seq_len, dim]` LSTM window."""
+        arr = np.asarray(raw_state, dtype=np.float32)
+        if not self.is_lstm:
+            return arr
+        if reset or self.timestep == 0:
+            self._state_window.clear()  # restart history at each episode boundary
+        self._state_window.append(arr)  # push most recent observation
+        seq = np.zeros((self.seq_len, self.state_dim), dtype=np.float32)
+        window = list(self._state_window)
+        seq[-len(window):] = window
+        return seq
+
+    def _to_tensor(self, arr):
+        """Move state batches to the configured device."""
+        tensor = torch.tensor(arr, dtype=torch.float32)
+        if not self.is_lstm:
+            return tensor.to(self.device)
+        if tensor.dim() == 2:
+            tensor = tensor.unsqueeze(0)
+        return tensor.to(self.device)
