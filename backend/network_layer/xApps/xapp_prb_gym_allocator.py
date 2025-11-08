@@ -671,11 +671,13 @@ class xAppGymPRBAllocator(xAppBase):
         next_states = self._to_tensor(next_states)
         dones = dones.to(self.device)
 
-        q_pred = self.q(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        q_eval = self.q(states)
+        q_pred = q_eval.gather(1, actions.unsqueeze(1)).squeeze(1)
         with torch.no_grad():
-            q_next = self.q_target(next_states).max(1)[0]
+            online_actions = self.q(next_states).max(1)[1]
+            q_next = self.q_target(next_states).gather(1, online_actions.unsqueeze(1)).squeeze(1)
             q_target_val = rewards + (1.0 - dones) * self.gamma * q_next
-        loss = F.mse_loss(q_pred, q_target_val)
+        loss = F.smooth_l1_loss(q_pred, q_target_val)
         self.opt.zero_grad()
         loss.backward()
         self.opt.step()
