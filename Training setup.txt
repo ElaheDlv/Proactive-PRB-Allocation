@@ -1,0 +1,35 @@
+
+
+
+
+
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym \
+  --prb-gym-config backend/assets/episodes/gym_from_training_config.json \
+  --dqn-train \
+  --dqn-model-arch lstm \
+  --dqn-seq-len 8 \
+  --dqn-seq-hidden 128 \
+  --sim-step 0.002        # 2 ms resolution for latency/buffer updates
+  --trace-bin 0.002       # match trace sampling to the sim step
+  --dqn-period 10         # act every 10 sim steps = 20 ms decision cadence
+  --dqn-move-step 5 \
+  --dqn-lr 5e-4 \
+  --dqn-target-update 500 \
+  --dqn-epsilon-decay 120000 \
+  --dqn-log-tb \
+  --steps 4000000 \
+  --dqn-save-interval 10000 \
+  --strict-real-traffic \
+  --ws-port 8761 \
+  --dash-port 8051
+
+
+
+  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config.json --dqn-train --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 128 --sim-step 0.002 --trace-bin 0.002 --dqn-period 10 --dqn-move-step 5 --dqn-lr 5e-4 --dqn-target-update 500 --dqn-epsilon-decay 120000 --dqn-log-tb --steps 4000000 --dqn-save-interval 10000 --strict-real-traffic --ws-port 8761 --dash-port 8051
+
+
+  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config.json --dqn-train --dqn-model-arch lstm --dqn-seq-len 16 --dqn-seq-hidden 128 --sim-step 0.002 --trace-bin 0.002 --dqn-period 10 --dqn-move-step 5 --dqn-lr 5e-4 --dqn-target-update 500 --dqn-epsilon-decay 120000 --dqn-log-tb --steps 4000000 --dqn-save-interval 10000 --strict-real-traffic --ws-port 8762 --dash-port 8052
+
+
+  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config.json --dqn-train --dqn-model-arch mlp --sim-step 0.002 --trace-bin 0.002 --dqn-period 10 --dqn-move-step 5 --dqn-lr 5e-4 --dqn-target-update 500 --dqn-epsilon-decay 120000 --dqn-log-tb --steps 4000000 --dqn-save-interval 10000 --strict-real-traffic --ws-port 8763 --dash-port 8053

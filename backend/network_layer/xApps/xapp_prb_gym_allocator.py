@@ -475,7 +475,9 @@ class PRBGymEnv:
         span = max(1e-9, self._latency_spans.get(slice_name, target))
         x = (latency_avg - target) / span  # normalised violation around zero
         alpha = max(1e-6, self._latency_sigmoid.get(slice_name, 6.0))
-        central = 1.0 / (1.0 + math.exp(alpha * x))  # smooth drop near target
+        z = alpha * x
+        z = max(-60.0, min(60.0, z))  # prevent overflow in exp()
+        central = 1.0 / (1.0 + math.exp(z))  # smooth drop near target
         pos = max(0.0, x)
         tail_c = max(1e-6, self._latency_tail.get(slice_name, 0.5))
         tail = 1.0 / (1.0 + pos / tail_c)  # heavy penalties for large violations
@@ -680,6 +682,12 @@ class xAppGymPRBAllocator(xAppBase):
         self._episode_step_count = 0
         self._eps_decay_per_episode = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_PER_EPISODE", 2000)))
         self._last_save_step = -1
+        self._episode_return = 0.0
+        self._episode_counter = 0
+        self._reward_running_alpha = float(getattr(settings, "PRB_GYM_RUNNING_AVG_ALPHA", 0.01))
+        self._reward_running_avg = 0.0
+        self._reward_running_init = False
+        self._cumulative_return = 0.0
 
     def start(self):
         """Reset the environment and print a short banner."""
@@ -692,6 +700,10 @@ class xAppGymPRBAllocator(xAppBase):
             return
         self.last_state = self._encode_state(raw_state, reset=True)
         self._episode_step_count = 0
+        self._episode_return = 0.0
+        self._cumulative_return = 0.0
+        self._reward_running_avg = 0.0
+        self._reward_running_init = False
         print(f"{self.xapp_id}: enabled (state_dim={self.state_dim}, actions={self.n_actions})")
 
     def step(self):
@@ -717,6 +729,14 @@ class xAppGymPRBAllocator(xAppBase):
         self._action_counts[action] += 1
         next_state_raw, reward_info, done, _ = self.env.step(action)
         reward, slice_metrics = reward_info
+        self._episode_return += reward
+        self._cumulative_return += reward
+        if not self._reward_running_init:
+            self._reward_running_avg = reward
+            self._reward_running_init = True
+        else:
+            alpha = self._reward_running_alpha
+            self._reward_running_avg += alpha * (reward - self._reward_running_avg)
         next_state = self._encode_state(next_state_raw, reset=False)
         self.replay.push(self.last_state, action, reward, next_state, float(done))
         loss = self._optimize()
@@ -725,6 +745,9 @@ class xAppGymPRBAllocator(xAppBase):
         if self._tb is not None and (self.timestep % self._tb_interval) == 0:
             self._log_tb(reward, self._epsilon(), self._last_loss, slice_metrics)
         if done:
+            self._episode_counter += 1
+            self._log_episode_return()
+            self._episode_return = 0.0
             reset_obs = self.env.reset()
             if reset_obs is None:
                 print(f"{self.xapp_id}: episode catalog finished; stopping training.")
@@ -829,6 +852,8 @@ class xAppGymPRBAllocator(xAppBase):
             return
         try:
             self._tb.add_scalar("train/reward", float(reward), self.timestep)
+            self._tb.add_scalar("train/reward_running_avg", float(self._reward_running_avg), self.timestep)
+            self._tb.add_scalar("train/return_cumulative", float(self._cumulative_return), self.timestep)
             self._tb.add_scalar("train/epsilon", float(epsilon), self.timestep)
             if loss is not None:
                 self._tb.add_scalar("train/loss", float(loss), self.timestep)
@@ -843,6 +868,15 @@ class xAppGymPRBAllocator(xAppBase):
             if self.timestep % (self._tb_interval * 10) == 0:
                 counts = [self._action_counts.get(i, 0) for i in range(self.n_actions)]
                 self._tb.add_histogram("actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
+        except Exception:
+            pass
+
+    def _log_episode_return(self):
+        """Log cumulative reward per episode for learning diagnostics."""
+        if self._tb is None:
+            return
+        try:
+            self._tb.add_scalar("train/episode_return", float(self._episode_return), self._episode_counter)
         except Exception:
             pass
 
