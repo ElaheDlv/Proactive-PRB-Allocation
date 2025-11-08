@@ -4,15 +4,14 @@ from typing import Dict, List, Optional, Set, Tuple
 import settings
 from utils import load_raw_packet_csv
 
-from .xapp_dqn_prb_allocator import (
-    SL_E,
-    SL_M,
-    SL_U,
-    xAppDQNPRBAllocator,
-)
+from . import xapp_dqn_prb_allocator as base_alloc
+
+SL_E = base_alloc.SL_E
+SL_U = base_alloc.SL_U
+SL_M = getattr(base_alloc, "SL_M", None)
 
 
-class xAppEpisodicDQNPRBAllocator(xAppDQNPRBAllocator):
+class xAppEpisodicDQNPRBAllocator(base_alloc.xAppDQNPRBAllocator):
     """Episodic wrapper around the DQN PRB allocator.
 
     Each episode bootstraps a deterministic set of UEs/traces/PRB quotas from a JSON
@@ -154,6 +153,8 @@ class xAppEpisodicDQNPRBAllocator(xAppDQNPRBAllocator):
 
         slice_prb = {}
         for sl in (SL_E, SL_U, SL_M):
+            if not sl:
+                continue
             if sl in entry.get("slice_prb", {}):
                 slice_prb[sl] = int(entry["slice_prb"][sl])
 
@@ -174,7 +175,7 @@ class xAppEpisodicDQNPRBAllocator(xAppDQNPRBAllocator):
             return SL_E
         if key in ("urllc", SL_U.lower()):
             return SL_U
-        if key in ("mmtc", SL_M.lower()):
+        if SL_M and key in ("mmtc", SL_M.lower()):
             return SL_M
         return None
 
