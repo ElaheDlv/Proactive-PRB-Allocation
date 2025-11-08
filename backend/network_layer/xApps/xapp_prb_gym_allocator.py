@@ -127,8 +127,10 @@ class PRBGymEnv:
         self._managed_ues: set[str] = set()
         self._trace_cache: Dict[Tuple[str, str, float], List[Tuple[float, float, float]]] = {}
         self._action_combos = list(product([-1, 0, 1], repeat=2))
-        self._state_dim = 12
+        self._state_dim = 8
         self._catalog_done = False
+        self._episode_progress_bar = None
+        self._progress_interval = max(1, int(getattr(settings, "PRB_GYM_PROGRESS_INTERVAL", 1000)))
 
     # ------------------------------------------------------------------ Episode control
     def _load_episode_specs(self) -> List[Dict]:
@@ -217,6 +219,9 @@ class PRBGymEnv:
         self._episode_step_limit = self._current_episode["duration_steps"]
         self._steps_in_episode = 0
         self._deploy_episode(self._current_episode)
+        total = len(self._episodes)
+        print(f"PRBGymEnv: episode {self._episode_idx + 1}/{total} -> '{self._current_episode['id']}' ({self._episode_step_limit} decisions)")
+        self._reset_progress_bar()
         return self._get_state()
 
     def _deploy_episode(self, spec: Dict):
@@ -258,6 +263,15 @@ class PRBGymEnv:
         if self.sim_engine is None:
             return
         ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
+        if not ok:
+            # First attempt may fire before BS finishes initial step; wait one tick and retry.
+            try:
+                import time
+
+                time.sleep(float(getattr(settings, "SIM_STEP_TIME_DEFAULT", 0.5) or 0.5))
+            except Exception:
+                pass
+            ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
         if not ok:
             return
         ue = self.sim_engine.ue_list.get(imsi)
@@ -314,7 +328,7 @@ class PRBGymEnv:
 
     # ------------------------------------------------------------------ Observation / reward
     def _get_state(self):
-        """Build the observation vector (12 elements) from the single training cell."""
+        """Build the observation vector (8 elements) from the single training cell."""
         cell = self._target_cell()
         if cell is None:
             return np.zeros(self._state_dim, dtype=np.float32)
@@ -331,9 +345,7 @@ class PRBGymEnv:
                 self._clamp01(data["slice_prb"] / max_prb),
                 self._clamp01(data["tx_mbps"] / dl_norm),
                 self._clamp01(data["buf_bytes"] / buf_norm),
-                self._clamp01(data["prb_req"] / max_prb),
-                self._grant_ratio(data["prb_granted"], data["prb_req"], max_prb),
-            ])
+                ])
         return np.asarray(state, dtype=np.float32)
 
     def _aggregate_slice_metrics(self, cell):
@@ -345,8 +357,6 @@ class PRBGymEnv:
                 "slice_prb": float(quota_map.get(SL_E, 0.0)),
                 "tx_mbps": 0.0,
                 "buf_bytes": 0.0,
-                "prb_req": 0.0,
-                "prb_granted": 0.0,
                 "latency_sum": 0.0,
                 "latency_count": 0,
             },
@@ -355,14 +365,10 @@ class PRBGymEnv:
                 "slice_prb": float(quota_map.get(SL_U, 0.0)),
                 "tx_mbps": 0.0,
                 "buf_bytes": 0.0,
-                "prb_req": 0.0,
-                "prb_granted": 0.0,
                 "latency_sum": 0.0,
                 "latency_count": 0,
             },
         }
-        req_map = getattr(cell, "dl_total_prb_demand", {}) or {}
-        alloc_map = getattr(cell, "prb_ue_allocation_dict", {}) or {}
         for ue in getattr(cell, "connected_ue_list", {}).values():
             sl = getattr(ue, "slice_type", None)
             if sl not in agg:
@@ -370,10 +376,6 @@ class PRBGymEnv:
             agg[sl]["ue_count"] += 1
             agg[sl]["tx_mbps"] += float(getattr(ue, "served_downlink_bitrate", 0.0) or 0.0) / 1e6
             agg[sl]["buf_bytes"] += float(getattr(ue, "dl_buffer_bytes", 0.0) or 0.0)
-            imsi = getattr(ue, "ue_imsi", None)
-            agg[sl]["prb_req"] += float(req_map.get(imsi, 0.0) or 0.0)
-            alloc = alloc_map.get(imsi, {}) or {}
-            agg[sl]["prb_granted"] += float(alloc.get("downlink", 0.0) or 0.0)
             agg[sl]["latency_sum"] += float(getattr(ue, "downlink_latency", 0.0) or 0.0)
             agg[sl]["latency_count"] += 1
         return agg
@@ -393,8 +395,54 @@ class PRBGymEnv:
                 score = 0.0
             else:
                 score = math.exp(-max(0.0, latency_avg) / target)
-            scores[sl] = self._clamp01(score)
-        return self.w_e * scores[SL_E] + self.w_u * scores[SL_U]
+            score = self._clamp01(score)
+            buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
+            tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
+            scores[sl] = {
+                "score": score,
+                "latency": latency_avg,
+                "buf_bytes": buf_bytes,
+                "tx_mbps": tx_mbps,
+            }
+        total_reward = self.w_e * scores[SL_E]["score"] + self.w_u * scores[SL_U]["score"]
+        return total_reward, scores
+
+    def _init_latency_targets(self) -> Dict[str, float]:
+        """Read per-slice latency budgets from settings (default to 10s / 1s)."""
+        slices_cfg = getattr(settings, "NETWORK_SLICES", {})
+
+        def _target(name: str, default: float) -> float:
+            return float(slices_cfg.get(name, {}).get("latency_dl", default) or default)
+
+        return {
+            SL_E: _target(SL_E, 100.0),
+            SL_U: _target(SL_U, 1.0),
+        }
+
+    def _reset_progress_bar(self):
+        self._episode_progress_bar = None
+        self._log_progress(reset=True)
+
+    def _log_progress(self, done=False, reset=False):
+        if not self._episode_progress_bar:
+            total = max(1, self._episode_step_limit)
+            bar_length = 40
+            self._episode_progress_bar = {
+                "total": total,
+                "bar_length": bar_length,
+            }
+        total = self._episode_progress_bar["total"]
+        bar_length = self._episode_progress_bar["bar_length"]
+        progress = min(total, self._steps_in_episode)
+        filled = int(bar_length * progress / total)
+        bar = "#" * filled + "-" * (bar_length - filled)
+        percent = 100.0 * progress / total
+        msg = f"Episode {self._episode_idx + 1}/{len(self._episodes)} [{bar}] {percent:5.1f}% ({progress}/{total})"
+        if done:
+            msg += " ✓"
+        if reset:
+            msg += " (reset)"
+        print(msg)
 
     # ------------------------------------------------------------------ Step
     def step(self, action_idx: int):
@@ -407,6 +455,8 @@ class PRBGymEnv:
         self._steps_in_episode += 1
         done = self._steps_in_episode >= self._episode_step_limit or self._traces_consumed()
         info = {"episode_id": self._current_episode["id"], "step": self._steps_in_episode}
+        if self._steps_in_episode % self._progress_interval == 0 or done:
+            self._log_progress(done)
         return state, reward, done, info
 
     def _apply_action(self, cell, action_idx: int):
@@ -512,6 +562,8 @@ class xAppGymPRBAllocator(xAppBase):
         self.seq_len = max(1, int(getattr(settings, "DQN_PRB_SEQ_LEN", 1)))
         self.seq_hidden = int(getattr(settings, "DQN_PRB_SEQ_HIDDEN", 128))
         self.is_lstm = self.model_arch == "lstm"
+        arch_tag = "lstm" if self.is_lstm else "mlp"
+        self.run_tag = f"{arch_tag}_seq{self.seq_len}" if self.is_lstm else "mlp"
 
         self.device = self._select_device()
         self.q, self.q_target = self._build_models()
@@ -561,14 +613,15 @@ class xAppGymPRBAllocator(xAppBase):
         self.timestep += 1
         action = self._select_action(self.last_state)
         self._action_counts[action] += 1
-        next_state_raw, reward, done, _ = self.env.step(action)
+        next_state_raw, reward_info, done, _ = self.env.step(action)
+        reward, slice_metrics = reward_info
         next_state = self._encode_state(next_state_raw, reset=False)
         self.replay.push(self.last_state, action, reward, next_state, float(done))
         loss = self._optimize()
         if loss is not None:
             self._last_loss = loss
         if self._tb is not None and (self.timestep % self._tb_interval) == 0:
-            self._log_tb(reward, self._epsilon(), self._last_loss)
+            self._log_tb(reward, self._epsilon(), self._last_loss, slice_metrics)
         if done:
             reset_obs = self.env.reset()
             if reset_obs is None:
@@ -655,7 +708,7 @@ class xAppGymPRBAllocator(xAppBase):
         if not getattr(settings, "DQN_TB_ENABLE", False):
             return
         base = getattr(settings, "DQN_TB_DIR", "backend/tb_logs")
-        logdir = os.path.join(base, f"prb_gym_{self._run_stamp}")
+        logdir = os.path.join(base, f"prb_gym_{self.run_tag}_{self._run_stamp}")
         try:
             from torch.utils.tensorboard import SummaryWriter
 
@@ -666,7 +719,7 @@ class xAppGymPRBAllocator(xAppBase):
             print(f"{self.xapp_id}: TensorBoard unavailable ({exc}); continuing without logging.")
             self._tb = None
 
-    def _log_tb(self, reward: float, epsilon: float, loss: Optional[float]):
+    def _log_tb(self, reward: float, epsilon: float, loss: Optional[float], slice_metrics: Dict[str, dict]):
         """Write scalar metrics / histograms to TensorBoard."""
         if self._tb is None:
             return
@@ -675,6 +728,12 @@ class xAppGymPRBAllocator(xAppBase):
             self._tb.add_scalar("train/epsilon", float(epsilon), self.timestep)
             if loss is not None:
                 self._tb.add_scalar("train/loss", float(loss), self.timestep)
+            for sl, metrics in slice_metrics.items():
+                label = "eMBB" if sl == SL_E else "URLLC"
+                self._tb.add_scalar(f"train/{label}/score", float(metrics["score"]), self.timestep)
+                self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
+                self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
+                self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
             if self.timestep % (self._tb_interval * 10) == 0:
                 counts = [self._action_counts.get(i, 0) for i in range(self.n_actions)]
                 self._tb.add_histogram("actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
@@ -712,12 +771,3 @@ class xAppGymPRBAllocator(xAppBase):
         if tensor.dim() == 2:
             tensor = tensor.unsqueeze(0)
         return tensor.to(self.device)
-    def _init_latency_targets(self) -> Dict[str, float]:
-        """Read per-slice latency budgets from settings (default to 10s / 1s)."""
-        slices_cfg = getattr(settings, "NETWORK_SLICES", {})
-        def _target(name: str, default: float) -> float:
-            return float(slices_cfg.get(name, {}).get("latency_dl", default) or default)
-        return {
-            SL_E: _target(SL_E, 10.0),
-            SL_U: _target(SL_U, 1.0),
-        }

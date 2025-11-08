@@ -241,6 +241,9 @@ class SimulationEngine(metaclass=utils.SingletonMeta):
         return
 
     def spawn_UEs(self):
+        # Avoid spawning while the network is still initializing (cells not ready).
+        if self.sim_step <= 0:
+            return
         current_ue_count = len(self.ue_list.keys())
         logger.info(f"Current UE count: {current_ue_count}")
         if current_ue_count >= settings.UE_DEFAULT_MAX_COUNT:

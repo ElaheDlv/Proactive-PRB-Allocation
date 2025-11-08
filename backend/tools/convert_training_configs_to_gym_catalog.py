@@ -64,6 +64,16 @@ def parse_args():
         default="convert_log.txt",
         help="Optional log file to record progress messages (default: convert_log.txt)",
     )
+    parser.add_argument(
+        "--embb-ue-ip",
+        default=None,
+        help="Default UE IP used to classify eMBB raw traces (required when using raw packet CSVs).",
+    )
+    parser.add_argument(
+        "--urllc-ue-ip",
+        default=None,
+        help="Default UE IP used to classify URLLC raw traces (required when using raw packet CSVs).",
+    )
     return parser.parse_args()
 
 
@@ -157,11 +167,13 @@ def main():
                             "ue_count": ue_count,
                             "trace": str(trace_embb),
                             "trace_speedup": args.trace_speedup,
+                            **({"ue_ip": args.embb_ue_ip} if args.embb_ue_ip else {}),
                         },
                         "URLLC": {
                             "ue_count": ue_count,
                             "trace": str(trace_urllc),
                             "trace_speedup": args.trace_speedup,
+                            **({"ue_ip": args.urllc_ue_ip} if args.urllc_ue_ip else {}),
                         },
                     },
                 }
