@@ -528,6 +528,18 @@ class PRBGymEnv:
             return 1.0 if granted <= 0.0 else max(0.0, min(1.0, granted / max_prb))
         return max(0.0, min(1.0, granted / max(1.0, requested)))
 
+    def _make_config_signature(self) -> str:
+        parts = [
+            f"arch-{self.run_tag}",
+            f"move-{self.env.move_step}",
+            f"period-{self.env.period_steps}",
+            f"batch-{self.batch}",
+            f"lr-{self.lr:g}",
+            f"gamma-{self.gamma:g}",
+        ]
+        parts.append("eps-reset")
+        return "__".join(parts)
+
 
 class xAppGymPRBAllocator(xAppBase):
     """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic).
@@ -570,6 +582,17 @@ class xAppGymPRBAllocator(xAppBase):
         self.is_lstm = self.model_arch == "lstm"
         arch_tag = "lstm" if self.is_lstm else "mlp"
         self.run_tag = f"{arch_tag}_seq{self.seq_len}" if self.is_lstm else "mlp"
+        self._base_model_path = getattr(settings, "DQN_PRB_MODEL_PATH", "backend/models/dqn_prb.pt")
+        self._run_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self._config_signature = self._make_config_signature()
+        base_root, base_ext = os.path.splitext(self._base_model_path)
+        if not base_ext:
+            base_ext = ".pt"
+        base_dir = os.path.dirname(base_root) or "."
+        base_name = os.path.basename(base_root) or "dqn_prb"
+        model_dir = os.path.join(base_dir, self._config_signature)
+        os.makedirs(model_dir, exist_ok=True)
+        self.model_path = os.path.join(model_dir, f"{base_name}_{self.run_tag}_{self._run_stamp}{base_ext}")
 
         self.device = self._select_device()
         self.q, self.q_target = self._build_models()
@@ -589,6 +612,7 @@ class xAppGymPRBAllocator(xAppBase):
         self._state_window: deque = deque(maxlen=self.seq_len)
         self._episode_step_count = 0
         self._eps_decay_per_episode = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_PER_EPISODE", 2000)))
+        self._last_save_step = -1
 
     def start(self):
         """Reset the environment and print a short banner."""
@@ -617,6 +641,7 @@ class xAppGymPRBAllocator(xAppBase):
         if self.train_max_steps > 0 and self.timestep >= self.train_max_steps:
             self.enabled = False
             print(f"{self.xapp_id}: reached max train steps; shutting down.")
+            self._maybe_save_checkpoint(force=True)
             return
 
         self.timestep += 1
@@ -636,6 +661,7 @@ class xAppGymPRBAllocator(xAppBase):
             reset_obs = self.env.reset()
             if reset_obs is None:
                 print(f"{self.xapp_id}: episode catalog finished; stopping training.")
+                self._maybe_save_checkpoint(force=True)
                 self.enabled = False
                 return
             self.last_state = self._encode_state(reset_obs, reset=True)
@@ -686,6 +712,7 @@ class xAppGymPRBAllocator(xAppBase):
         self.opt.step()
         if self.timestep % self.target_sync == 0:
             self.q_target.load_state_dict(self.q.state_dict())
+        self._maybe_save_checkpoint()
         return float(loss.item())
 
     def _select_device(self):
@@ -715,7 +742,6 @@ class xAppGymPRBAllocator(xAppBase):
 
     def _setup_tensorboard(self):
         """Initialise TensorBoard logging if enabled."""
-        self._run_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         if not getattr(settings, "DQN_TB_ENABLE", False):
             return
         base = getattr(settings, "DQN_TB_DIR", "backend/tb_logs")
@@ -751,9 +777,58 @@ class xAppGymPRBAllocator(xAppBase):
         except Exception:
             pass
 
+    def _checkpoint_path(self, step: Optional[int] = None) -> str:
+        """Return checkpoint file path, optionally annotated with a step index."""
+        base, ext = os.path.splitext(self.model_path)
+        if not ext:
+            base = self.model_path
+        suffix = "_final" if step is None else f"_step{int(step)}"
+        if ext:
+            return f"{base}{suffix}{ext}"
+        return f"{base}{suffix}"
+
+    def _save_model(self, path: str):
+        """Persist the online Q-network weights to disk."""
+        if not TORCH_AVAILABLE or not path or getattr(self, "q", None) is None:
+            return
+        directory = os.path.dirname(path)
+        if directory:
+            try:
+                os.makedirs(directory, exist_ok=True)
+            except Exception:
+                pass
+        try:
+            torch.save(self.q.state_dict(), path)
+        except Exception:
+            pass
+
+    def _maybe_save_checkpoint(self, force: bool = False):
+        """Save checkpoints periodically or when forced (e.g. shutdown)."""
+        if not TORCH_AVAILABLE or getattr(self, "q", None) is None:
+            return
+        if force:
+            final_path = self._checkpoint_path(None)
+            self._save_model(final_path)
+            if self.timestep > 0:
+                step_path = self._checkpoint_path(self.timestep)
+                self._save_model(step_path)
+            return
+        if self.save_interval <= 0:
+            return
+        if self.timestep <= 0 or self.timestep == self._last_save_step:
+            return
+        if (self.timestep % self.save_interval) != 0:
+            return
+        final_path = self._checkpoint_path(None)
+        self._save_model(final_path)
+        step_path = self._checkpoint_path(self.timestep)
+        self._save_model(step_path)
+        self._last_save_step = self.timestep
+
     def __del__(self):
         """Best-effort cleanup for the TB writer."""
         try:
+            self._maybe_save_checkpoint(force=True)
             if self._tb is not None:
                 self._tb.flush()
                 self._tb.close()
