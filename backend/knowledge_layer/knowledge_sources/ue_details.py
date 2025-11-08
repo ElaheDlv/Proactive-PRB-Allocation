@@ -2,7 +2,11 @@ from typing import Any
 from agents import function_tool
 from pydantic import BaseModel
 from pydantic import Field
-from settings.slice_config import NETWORK_SLICE_EMBB_NAME, NETWORK_SLICE_MTC_NAME, NETWORK_SLICE_URLLC_NAME
+from settings.slice_config import NETWORK_SLICE_EMBB_NAME, NETWORK_SLICE_URLLC_NAME
+try:
+    from settings.slice_config import NETWORK_SLICE_MTC_NAME
+except ImportError:
+    NETWORK_SLICE_MTC_NAME = None
 from network_layer.simulation_engine import SimulationEngine
 
 class UEDetails:
@@ -26,7 +30,7 @@ def add_ue(imsi: str, network_slices: list[str]):
     Args:
         imsi (str): The IMSI of the UE, it should be like IMSI_<number>.
         network_slices (list[str]): A list of network slices that the UE is allowed to use.
-                                    It can be at least one of [eMBB, URLLC, mMTC].
+                                    It can be at least one of the currently enabled slices (eMBB, URLLC).
     Returns:
         str: Status message.
     """
@@ -75,10 +79,15 @@ def get_available_ue_description() -> str:
 
 class GetUE(BaseModel):
     IMSI: str = Field(description = "The name of the subscription always starts with IMSI_")
-    NETWORK_SLICES: list[str] = Field(description="The allocated network slices to the subscription should be atleast one of [eMBB, uRLLC, mMTC]")
+    NETWORK_SLICES: list[str] = Field(description="The allocated network slices to the subscription should be at least one of the available slices (eMBB, URLLC).")
+
+DEFAULT_SLICES = [NETWORK_SLICE_EMBB_NAME, NETWORK_SLICE_URLLC_NAME]
+if NETWORK_SLICE_MTC_NAME:
+    DEFAULT_SLICES.append(NETWORK_SLICE_MTC_NAME)
+
 
 @function_tool
-def get_ues(slices: list[str] = [NETWORK_SLICE_EMBB_NAME, NETWORK_SLICE_URLLC_NAME, NETWORK_SLICE_MTC_NAME]) -> list[GetUE]:
+def get_ues(slices: list[str] = DEFAULT_SLICES) -> list[GetUE]:
     """
     Retrieve all registered User Equipments (UEs) from the core network along with their IMSIs and network slice subscriptions.
 
