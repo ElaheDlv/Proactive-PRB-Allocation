@@ -241,7 +241,9 @@ class SimulationEngine(metaclass=utils.SingletonMeta):
         return
 
     def spawn_UEs(self):
-        # Avoid spawning while the network is still initializing (cells not ready).
+        # Avoid background spawns during Gym-driven episodes or before init completes.
+        if getattr(settings, "PRB_GYM_ENABLE", False):
+            return
         if self.sim_step <= 0:
             return
         current_ue_count = len(self.ue_list.keys())

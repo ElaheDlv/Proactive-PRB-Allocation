@@ -262,17 +262,23 @@ class PRBGymEnv:
         """Spawn a scripted UE, optionally pinning mobility and attaching traces."""
         if self.sim_engine is None:
             return
-        ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
-        if not ok:
-            # First attempt may fire before BS finishes initial step; wait one tick and retry.
+        max_attempts = max(1, int(getattr(settings, "PRB_GYM_REGISTER_RETRIES", 10)))
+        ok = False
+        attempt = 0
+        while attempt < max_attempts:
+            ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
+            if ok:
+                break
+            attempt += 1
+            # Give the simulator a moment (cells may still be initialising) before retrying.
             try:
                 import time
 
                 time.sleep(float(getattr(settings, "SIM_STEP_TIME_DEFAULT", 0.5) or 0.5))
             except Exception:
                 pass
-            ok = self.sim_engine.register_ue(imsi, [slice_name], register_slice=slice_name)
         if not ok:
+            print(f"{self.xapp_id}: unable to register {imsi} after {max_attempts} attempts; skipping.")
             return
         ue = self.sim_engine.ue_list.get(imsi)
         if ue is None:
