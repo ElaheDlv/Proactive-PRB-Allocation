@@ -117,6 +117,10 @@ class PRBGymEnv:
         self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.5))
         self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.5))
         self._latency_targets = self._init_latency_targets()
+        self._latency_spans = self._init_latency_spans()
+        self._latency_bonus = self._init_latency_bonus()
+        self._latency_sigmoid = self._init_latency_sigmoid()
+        self._latency_tail = self._init_latency_tail()
 
         self._episodes = self._load_episode_specs()
         self._episode_loop = getattr(settings, "PRB_GYM_LOOP", False)
@@ -387,30 +391,32 @@ class PRBGymEnv:
         return agg
 
     def _reward(self, cell):
-        """Compute reward purely from latency adherence per slice."""
+        """Latency-focused reward with URLLC emphasis and under-target bonuses."""
         agg = self._aggregate_slice_metrics(cell)
-        scores = {}
+        scores: Dict[str, Dict[str, float]] = {}
+        weights = {SL_E: self.w_e, SL_U: self.w_u}
+        weighted = 0.0
+        bonus_total = 0.0
         for sl in (SL_E, SL_U):
             data = agg[sl]
             latency_avg = 0.0
             cnt = data.get("latency_count", 0)
             if cnt > 0:
                 latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
-            target = self._latency_targets.get(sl, 1.0)
-            if target <= 0.0:
-                score = 0.0
-            else:
-                score = math.exp(-max(0.0, latency_avg) / target)
-            score = self._clamp01(score)
+            score = self._slice_score(latency_avg, sl)
+            bonus = self._slice_bonus(latency_avg, sl)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
             scores[sl] = {
                 "score": score,
+                "bonus": bonus,
                 "latency": latency_avg,
                 "buf_bytes": buf_bytes,
                 "tx_mbps": tx_mbps,
             }
-        total_reward = self.w_e * scores[SL_E]["score"] + self.w_u * scores[SL_U]["score"]
+            weighted += weights[sl] * score
+            bonus_total += bonus
+        total_reward = max(-1.0, min(1.0, weighted + bonus_total))
         return total_reward, scores
 
     def _init_latency_targets(self) -> Dict[str, float]:
@@ -421,9 +427,71 @@ class PRBGymEnv:
             return float(slices_cfg.get(name, {}).get("latency_dl", default) or default)
 
         return {
-            SL_E: _target(SL_E, 100.0),
-            SL_U: _target(SL_U, 1.0),
+            SL_E: _target(SL_E, 0.1),   # 100 ms default (seconds)
+            SL_U: _target(SL_U, 0.001), # 1 ms default (seconds)
         }
+
+    def _init_latency_spans(self) -> Dict[str, float]:
+        """Define how far beyond the target latency each slice can go before score=0."""
+        slices_cfg = getattr(settings, "NETWORK_SLICES", {})
+
+        def _span(name: str, fallback_mult: float) -> float:
+            cfg = slices_cfg.get(name, {})
+            span_val = cfg.get("latency_span")
+            if span_val is not None:
+                return max(1e-6, float(span_val))
+            target = self._latency_targets.get(name, 1.0)
+            return max(1e-6, target * fallback_mult)
+
+        return {
+            SL_E: _span(SL_E, 1.0),   # eMBB tolerates up to ~2× target (200 ms)
+            SL_U: _span(SL_U, 2.0),   # URLLC score hits zero quickly (~3 ms)
+        }
+
+    def _init_latency_bonus(self) -> Dict[str, float]:
+        """Per-slice coefficients for rewarding sub-target latency."""
+        return {
+            SL_E: float(getattr(settings, "PRB_GYM_LAT_BONUS_EMBB", 0.02)),
+            SL_U: float(getattr(settings, "PRB_GYM_LAT_BONUS_URLLC", 0.05)),
+        }
+
+    def _init_latency_sigmoid(self) -> Dict[str, float]:
+        """Slope controls for the logistic component (higher => sharper drop)."""
+        return {
+            SL_E: float(getattr(settings, "PRB_GYM_SIGMOID_ALPHA_EMBB", 4.0)),
+            SL_U: float(getattr(settings, "PRB_GYM_SIGMOID_ALPHA_URLLC", 8.0)),
+        }
+
+    def _init_latency_tail(self) -> Dict[str, float]:
+        """Tail parameters for heavy penalties once violations grow large."""
+        return {
+            SL_E: float(getattr(settings, "PRB_GYM_TAIL_C_EMBB", 0.5)),
+            SL_U: float(getattr(settings, "PRB_GYM_TAIL_C_URLLC", 0.3)),
+        }
+
+    def _slice_score(self, latency_avg: float, slice_name: str) -> float:
+        """Smooth logistic+tail score in [0,1] measuring latency adherence."""
+        target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+        span = max(1e-9, self._latency_spans.get(slice_name, target))
+        x = (latency_avg - target) / span  # normalised violation around zero
+        alpha = max(1e-6, self._latency_sigmoid.get(slice_name, 6.0))
+        central = 1.0 / (1.0 + math.exp(alpha * x))  # smooth drop near target
+        pos = max(0.0, x)
+        tail_c = max(1e-6, self._latency_tail.get(slice_name, 0.5))
+        tail = 1.0 / (1.0 + pos / tail_c)  # heavy penalties for large violations
+        w = pos / (1.0 + pos)  # blend factor once we exceed the budget
+        score = (1.0 - w) * central + w * tail
+        eps = 1e-3
+        return max(eps, min(1.0 - eps, score))
+
+    def _slice_bonus(self, latency_avg: float, slice_name: str) -> float:
+        """Additional reward for staying below the latency budget."""
+        coeff = max(0.0, self._latency_bonus.get(slice_name, 0.0))
+        if coeff <= 0.0:
+            return 0.0
+        target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+        under = max(0.0, target - latency_avg)
+        return coeff * (under / target)
 
     def _reset_progress_bar(self):
         self._episode_progress_bar = None
@@ -528,6 +596,14 @@ class PRBGymEnv:
             return 1.0 if granted <= 0.0 else max(0.0, min(1.0, granted / max_prb))
         return max(0.0, min(1.0, granted / max(1.0, requested)))
 
+class xAppGymPRBAllocator(xAppBase):
+    """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic).
+
+    This xApp wraps the simulator inside a Gym-like environment (reset/step) and
+    trains a DQN (MLP or LSTM) to move PRBs between two slices. It owns the
+    entire training loop, so it does not rely on the legacy PRB allocator code.
+    """
+
     def _make_config_signature(self) -> str:
         parts = [
             f"arch-{self.run_tag}",
@@ -539,15 +615,6 @@ class PRBGymEnv:
         ]
         parts.append("eps-reset")
         return "__".join(parts)
-
-
-class xAppGymPRBAllocator(xAppBase):
-    """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic).
-
-    This xApp wraps the simulator inside a Gym-like environment (reset/step) and
-    trains a DQN (MLP or LSTM) to move PRBs between two slices. It owns the
-    entire training loop, so it does not rely on the legacy PRB allocator code.
-    """
 
     def __init__(self, ric=None):
         super().__init__(ric=ric)
@@ -768,6 +835,8 @@ class xAppGymPRBAllocator(xAppBase):
             for sl, metrics in slice_metrics.items():
                 label = "eMBB" if sl == SL_E else "URLLC"
                 self._tb.add_scalar(f"train/{label}/score", float(metrics["score"]), self.timestep)
+                if "bonus" in metrics:
+                    self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
