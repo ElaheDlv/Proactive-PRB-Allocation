@@ -116,9 +116,17 @@ class PRBGymEnv:
         self.urlc_gamma_s = float(getattr(settings, "DQN_URLLC_GAMMA_S", 0.01))
         self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.5))
         self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.5))
+        total_w = self.w_e + self.w_u
+        if total_w <= 0:
+            self.w_e = self.w_u = 0.5
+            print(f"{self.xapp_id}: invalid slice weights; falling back to 0.5/0.5.")
+        else:
+            self.w_e /= total_w
+            self.w_u /= total_w
         self._latency_targets = self._init_latency_targets()
         self._latency_spans = self._init_latency_spans()
         self._latency_bonus = self._init_latency_bonus()
+        self._prb_penalty = self._init_prb_penalty()
         self._latency_sigmoid = self._init_latency_sigmoid()
         self._latency_tail = self._init_latency_tail()
 
@@ -393,6 +401,7 @@ class PRBGymEnv:
     def _reward(self, cell):
         """Latency-focused reward with URLLC emphasis and under-target bonuses."""
         agg = self._aggregate_slice_metrics(cell)
+        max_prb = max(1.0, float(getattr(cell, "max_dl_prb", 1.0)))
         scores: Dict[str, Dict[str, float]] = {}
         weights = {SL_E: self.w_e, SL_U: self.w_u}
         weighted = 0.0
@@ -405,11 +414,19 @@ class PRBGymEnv:
                 latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
             score = self._slice_score(latency_avg, sl)
             bonus = self._slice_bonus(latency_avg, sl)
+            prb_pen = self._slice_prb_penalty(
+                float(data.get("slice_prb", 0.0) or 0.0),
+                sl,
+                max_prb,
+                latency_avg,
+            )
+            score = max(0.0, score - prb_pen)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
             scores[sl] = {
                 "score": score,
                 "bonus": bonus,
+                "prb_penalty": prb_pen,
                 "latency": latency_avg,
                 "buf_bytes": buf_bytes,
                 "tx_mbps": tx_mbps,
@@ -455,6 +472,13 @@ class PRBGymEnv:
             SL_U: float(getattr(settings, "PRB_GYM_LAT_BONUS_URLLC", 0.05)),
         }
 
+    def _init_prb_penalty(self) -> Dict[str, float]:
+        """Per-slice coefficients penalising large PRB quotas."""
+        return {
+            SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 0.01)),
+            SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 0.02)),
+        }
+
     def _init_latency_sigmoid(self) -> Dict[str, float]:
         """Slope controls for the logistic component (higher => sharper drop)."""
         return {
@@ -494,6 +518,17 @@ class PRBGymEnv:
         target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
         under = max(0.0, target - latency_avg)
         return coeff * (under / target)
+
+    def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, latency_avg: float) -> float:
+        """Penalty applied only when latency already meets target, scaled quadratically by PRB usage."""
+        coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
+        if coeff <= 0.0:
+            return 0.0
+        target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+        if latency_avg > target:
+            return 0.0
+        usage = max(0.0, slice_prb) / max(1e-6, max_prb)
+        return coeff * (usage ** 2)
 
     def _reset_progress_bar(self):
         self._episode_progress_bar = None
@@ -862,6 +897,8 @@ class xAppGymPRBAllocator(xAppBase):
                 self._tb.add_scalar(f"train/{label}/score", float(metrics["score"]), self.timestep)
                 if "bonus" in metrics:
                     self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
+                if "prb_penalty" in metrics:
+                    self._tb.add_scalar(f"train/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
