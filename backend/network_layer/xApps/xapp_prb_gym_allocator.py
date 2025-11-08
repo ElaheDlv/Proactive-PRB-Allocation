@@ -587,6 +587,8 @@ class xAppGymPRBAllocator(xAppBase):
         self._tb_interval = max(1, int(getattr(settings, "DQN_PRB_LOG_INTERVAL", 1)))
         self._setup_tensorboard()
         self._state_window: deque = deque(maxlen=self.seq_len)
+        self._episode_step_count = 0
+        self._eps_decay_per_episode = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_PER_EPISODE", 2000)))
 
     def start(self):
         """Reset the environment and print a short banner."""
@@ -598,6 +600,7 @@ class xAppGymPRBAllocator(xAppBase):
             self.enabled = False
             return
         self.last_state = self._encode_state(raw_state, reset=True)
+        self._episode_step_count = 0
         print(f"{self.xapp_id}: enabled (state_dim={self.state_dim}, actions={self.n_actions})")
 
     def step(self):
@@ -617,6 +620,7 @@ class xAppGymPRBAllocator(xAppBase):
             return
 
         self.timestep += 1
+        self._episode_step_count += 1
         action = self._select_action(self.last_state)
         self._action_counts[action] += 1
         next_state_raw, reward_info, done, _ = self.env.step(action)
@@ -635,6 +639,7 @@ class xAppGymPRBAllocator(xAppBase):
                 self.enabled = False
                 return
             self.last_state = self._encode_state(reset_obs, reset=True)
+            self._episode_step_count = 0
         else:
             self.last_state = next_state
         self.last_done = done
@@ -654,10 +659,8 @@ class xAppGymPRBAllocator(xAppBase):
             return int(torch.argmax(q_vals, dim=1).item())
 
     def _epsilon(self):
-        """Linear epsilon decay schedule."""
-        if self.eps_decay <= 0:
-            return self.eps_end
-        frac = min(1.0, self.timestep / float(self.eps_decay))
+        """Episode-aware epsilon decay schedule."""
+        frac = min(1.0, self._episode_step_count / float(self._eps_decay_per_episode))
         return self.eps_start + (self.eps_end - self.eps_start) * frac
 
     def _optimize(self):
