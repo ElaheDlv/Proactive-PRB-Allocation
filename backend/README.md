@@ -149,7 +149,7 @@ Downlink replay and buffering happen at the gNB (Base Station): the BS owns a pe
     You can also attach by slice or ALL UEs:
     - `--trace-raw-map slice:eMBB:path/to/embb.csv:UE_IP`
     - `--trace-raw-map ALL:path/to/trace.csv:UE_IP`
-  - `--trace-bin <seconds>` (aggregation bin for raw CSV; default 1.0)
+  - `--trace-bin <seconds>` (aggregation bin for raw CSV; default 1.0; set to 0 or a negative value to disable binning and replay using the exact timestamps from the CSV)
 - `--trace-overhead-bytes <n>` (subtract per-packet bytes in raw CSV; default 0)
 - `--trace-loop` (replay traces continuously)
 - `--slice-prb SLICE=PRBs` (repeatable; sets the initial downlink PRB quota for a slice, e.g. `--slice-prb eMBB=40 --slice-prb URLLC=20`)
@@ -157,7 +157,7 @@ Downlink replay and buffering happen at the gNB (Base Station): the BS owns a pe
 Key trace flags (what they do):
 
 - `--trace-speedup <x>`: scales the replay clock. 1.0 = real time. 2.0 replays twice as fast (the same traced seconds happen in half the wall-clock time); 0.5 replays at half speed. Affects when DL samples are enqueued into the gNB DL queue; serving still happens per simulation step.
-- `--trace-bin <seconds>`: aggregation window for raw packet CSVs. Packets are grouped by `floor((t - t0)/bin)*bin` and summed to produce `(t, dl_bytes, ul_bytes)` samples. Smaller bins (e.g., 0.2) preserve burstiness; larger bins (e.g., 2.0) smooth traffic. Default 1.0 aligns with the simulator’s 1 s step.
+- `--trace-bin <seconds>`: aggregation window for raw packet CSVs. Packets are grouped by `floor((t - t0)/bin)*bin` and summed to produce `(t, dl_bytes, ul_bytes)` samples. Smaller bins (e.g., 0.2) preserve burstiness; larger bins (e.g., 2.0) smooth traffic. Default 1.0 aligns with the simulator’s 1 s step. Supplying 0 (or any negative value) disables binning so the replay follows each timestamp exactly as provided in the CSV.
 - `--trace-loop`: when enabled, traces repeat seamlessly after the last sample. Without this, each trace plays once and stops offering new bytes after the end.
 
 Examples:
@@ -659,7 +659,8 @@ python -m backend.tools.convert_training_configs_to_gym_catalog \
   --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
   --output backend/assets/episodes/gym_from_training_config.json \
   --sim-step 0.002 \
-  --decision-period 1
+  --decision-period 1 \
+  --trace-bin 0
 
 
   python -m backend.tools.convert_training_configs_to_gym_catalog \
@@ -667,8 +668,10 @@ python -m backend.tools.convert_training_configs_to_gym_catalog \
   --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
   --output backend/assets/episodes/gym_from_training_config.json \
   --sim-step 0.002 --decision-period 10 \
+  --trace-bin 0 \
   --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
 
+Passing `--trace-bin 0` stamps each slice in the generated Gym catalog with `trace_bin: 0`, which the xApp propagates to `load_raw_packet_csv`; the simulator then replays traffic strictly according to the CSV `time` column (no implicit per-line binning).
 
 
 

@@ -176,12 +176,24 @@ def load_raw_packet_csv(
           DL if Destination == ue_ip; UL if Source == ue_ip.
       - Time is normalized to start at 0 using the first observed timestamp.
       - Packets are grouped into bins of width `bin_s` seconds using
-        floor((t - t0)/bin_s) * bin_s; the output is a list of
-        (bin_time_s, dl_bytes, ul_bytes) sorted by time.
+        floor((t - t0)/bin_s) * bin_s; set `bin_s <= 0` to disable binning
+        and keep each packet's original timestamp (still normalized).
+      - The output is a list of (time_s, dl_bytes, ul_bytes) sorted by time.
     """
     # Read header row to build a name->index map (case-insensitive)
     if not ue_ip:
         raise ValueError("ue_ip is required to classify DL/UL; pass ue_ip explicitly.")
+
+    # Treat non-positive bin sizes as "no binning" to preserve per-packet timestamps.
+    use_binning = True
+    try:
+        bin_width = float(bin_s)
+    except Exception:
+        bin_width = 1.0
+    if bin_width <= 0.0:
+        use_binning = False
+    else:
+        bin_width = max(1e-9, bin_width)
 
     with open(path, "r", newline="") as f:
         reader = csv.reader(f)
@@ -215,8 +227,12 @@ def load_raw_packet_csv(
                 first_t = t
             # Normalize time to start at zero (relative to first packet)
             t0 = t - (first_t or 0.0)
-            # Compute bin start time with numeric stability guards
-            b = math.floor(t0 / max(1e-6, float(bin_s))) * float(bin_s)
+            # Compute bin start time (or keep original timestamp when binning disabled)
+            if use_binning:
+                b = math.floor(t0 / bin_width) * bin_width
+            else:
+                # Round to mitigate floating noise when timestamps are high precision
+                b = round(t0, 9)
             dl, ul = bins.get(b, (0, 0))
             # Subtract protocol overhead to approximate payload bytes
             adj = max(0, int(length) - max(0, int(overhead_sub_bytes)))
