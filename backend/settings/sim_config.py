@@ -75,6 +75,7 @@ try:
     TRACE_BIN = float(os.getenv("TRACE_BIN", "1.0"))
 except Exception:
     TRACE_BIN = 1.0
+TRACE_BIN_OVERRIDE = os.getenv("TRACE_BIN_OVERRIDE", "0") in ("1", "true", "True")
 
 # Subtract per-packet overhead when aggregating raw traces (e.g., headers/trailer)
 # Default is 0 since the simulator does not re-encapsulate packets; adjust only if

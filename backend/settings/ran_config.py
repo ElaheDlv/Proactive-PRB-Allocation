@@ -267,6 +267,10 @@ DQN_EPISODE_CONFIG_JSON = os.getenv("DQN_EPISODE_CONFIG_JSON", "")
 PRB_GYM_ENABLE = os.getenv("PRB_GYM_ENABLE", "0") in ("1", "true", "True")
 PRB_GYM_CONFIG_PATH = os.getenv("PRB_GYM_CONFIG_PATH", "")
 PRB_GYM_LOOP = os.getenv("PRB_GYM_LOOP", "0") in ("1", "true", "True")
+try:
+    PRB_GYM_EPS_DECAY_PER_EPISODE = int(os.getenv("PRB_GYM_EPS_DECAY_PER_EPISODE", "2000"))
+except Exception:
+    PRB_GYM_EPS_DECAY_PER_EPISODE = 2000
 
 
 RAN_TOPOLOGY_PRESET = os.getenv("RAN_TOPOLOGY_PRESET", "default")  # 'default' or 'simple'

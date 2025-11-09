@@ -165,6 +165,11 @@ parser.add_argument("--sb3-dqn-save-interval", type=int, help="Autosave interval
 parser.add_argument("--prb-gym", action="store_true", help="Enable Gym-style PRB allocator xApp")
 parser.add_argument("--prb-gym-config", type=str, help="Episode config JSON for the Gym-style PRB xApp")
 parser.add_argument("--prb-gym-loop", action="store_true", help="Loop the Gym-style episode catalog")
+parser.add_argument(
+    "--prb-gym-eps-decay",
+    type=int,
+    help="Per-episode epsilon decay steps for the Gym-style PRB allocator",
+)
 # Trace replay options
 parser.add_argument(
     "--trace-speedup",
@@ -375,6 +380,13 @@ if args.prb_gym_config:
     os.environ["PRB_GYM_CONFIG_PATH"] = args.prb_gym_config
 if args.prb_gym_loop:
     os.environ["PRB_GYM_LOOP"] = "1"
+if args.prb_gym_eps_decay is not None:
+    try:
+        _pg_decay = max(1, int(args.prb_gym_eps_decay))
+    except Exception:
+        _pg_decay = None
+    if _pg_decay:
+        os.environ["PRB_GYM_EPS_DECAY_PER_EPISODE"] = str(_pg_decay)
 
 # Trace mapping and options (export via env before importing settings)
 if args.trace_speedup is not None:
@@ -441,6 +453,7 @@ if args.trace_raw_map:
         os.environ["TRACE_RAW_MAP_JSON"] = json.dumps(raw_items)
 if args.trace_bin is not None:
     os.environ["TRACE_BIN"] = str(args.trace_bin)
+    os.environ["TRACE_BIN_OVERRIDE"] = "1"
 if args.trace_overhead_bytes is not None:
     os.environ["TRACE_OVERHEAD_BYTES"] = str(args.trace_overhead_bytes)
 if args.trace_debug:

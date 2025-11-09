@@ -650,6 +650,29 @@ python backend/main.py --preset simple --mode server \
 
 
 
+
+
+
+
+python -m backend.tools.convert_training_configs_to_gym_catalog \
+  --input backend/notebooks/xapp_dqn_training_configs.json \
+  --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
+  --output backend/assets/episodes/gym_from_training_config.json \
+  --sim-step 0.002 \
+  --decision-period 1
+
+
+  python -m backend.tools.convert_training_configs_to_gym_catalog \
+  --input backend/notebooks/xapp_dqn_training_configs.json \
+  --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
+  --output backend/assets/episodes/gym_from_training_config.json \
+  --sim-step 0.002 --decision-period 1 \
+  --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
+
+
+
+
+
 ##############################################################
     python backend/main.py --preset simple --mode server \
     --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \

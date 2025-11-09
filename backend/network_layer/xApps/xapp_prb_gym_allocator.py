@@ -205,12 +205,16 @@ class PRBGymEnv:
         count = int(cfg.get("ue_count", 0))
         if count <= 0:
             return None
+        trace_speed = float(cfg.get("trace_speedup", getattr(settings, "TRACE_SPEEDUP", 1.0)))
+        trace_bin = float(cfg.get("trace_bin", getattr(settings, "TRACE_BIN", 1.0)))
+        if getattr(settings, "TRACE_BIN_OVERRIDE", False):
+            trace_bin = float(getattr(settings, "TRACE_BIN", trace_bin))
         return {
             "ue_count": count,
             "trace": cfg.get("trace"),
             "ue_ip": cfg.get("ue_ip"),
-            "trace_speedup": float(cfg.get("trace_speedup", getattr(settings, "TRACE_SPEEDUP", 1.0))),
-            "trace_bin": float(cfg.get("trace_bin", getattr(settings, "TRACE_BIN", 1.0))),
+            "trace_speedup": trace_speed,
+            "trace_bin": trace_bin,
         }
 
     def reset(self):
@@ -414,8 +418,9 @@ class PRBGymEnv:
                 latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
             score = self._slice_score(latency_avg, sl)
             bonus = self._slice_bonus(latency_avg, sl)
+            slice_prb = float(data.get("slice_prb", 0.0) or 0.0)
             prb_pen = self._slice_prb_penalty(
-                float(data.get("slice_prb", 0.0) or 0.0),
+                slice_prb,
                 sl,
                 max_prb,
                 latency_avg,
@@ -427,6 +432,8 @@ class PRBGymEnv:
                 "score": score,
                 "bonus": bonus,
                 "prb_penalty": prb_pen,
+                "prb_usage_norm": slice_prb / max_prb,
+                "prb_usage_prb": slice_prb,
                 "latency": latency_avg,
                 "buf_bytes": buf_bytes,
                 "tx_mbps": tx_mbps,
@@ -899,6 +906,10 @@ class xAppGymPRBAllocator(xAppBase):
                     self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
                 if "prb_penalty" in metrics:
                     self._tb.add_scalar(f"train/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
+                if "prb_usage_norm" in metrics:
+                    self._tb.add_scalar(f"train/{label}/prb_usage_norm", float(metrics["prb_usage_norm"]), self.timestep)
+                if "prb_usage_prb" in metrics:
+                    self._tb.add_scalar(f"train/{label}/prb_usage_prb", float(metrics["prb_usage_prb"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
