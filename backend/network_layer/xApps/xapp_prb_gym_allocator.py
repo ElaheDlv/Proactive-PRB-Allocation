@@ -906,8 +906,10 @@ class xAppGymPRBAllocator(xAppBase):
                     self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
                 if "prb_penalty" in metrics:
                     self._tb.add_scalar(f"train/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
-                if "prb_usage" in metrics:
-                    self._tb.add_scalar(f"train/{label}/prb_usage", float(metrics["prb_usage"]), self.timestep)
+                prb_norm = float(metrics.get("prb_usage_norm", 0.0))
+                prb_abs = float(metrics.get("prb_usage_prb", 0.0))
+                self._tb.add_scalar(f"train/{label}/prb_usage_norm", prb_norm, self.timestep)
+                self._tb.add_scalar(f"train/{label}/prb_usage_prb", prb_abs, self.timestep)
                 self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
