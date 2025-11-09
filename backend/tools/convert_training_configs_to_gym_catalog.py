@@ -13,7 +13,7 @@ python backend/tools/convert_training_configs_to_gym_catalog.py \
   --input backend/notebooks/xapp_dqn_training_configs.json \
   --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
   --output backend/assets/episodes/gym_from_training_config.json \
-  --sim-step 0.05 --decision-period 1
+  --sim-step 0.05 --decision-period 1 --trace-bin 0
 """
 
 import argparse
@@ -74,6 +74,12 @@ def parse_args():
         default=None,
         help="Default UE IP used to classify URLLC raw traces (required when using raw packet CSVs).",
     )
+    parser.add_argument(
+        "--trace-bin",
+        type=float,
+        default=None,
+        help="Optional trace bin width stored per slice. Pass 0 (or negative) to disable binning and replay using CSV timestamps.",
+    )
     return parser.parse_args()
 
 
@@ -85,6 +91,7 @@ def trace_duration_seconds(path: Path) -> float:
         last_time = 0.0
         with path.open("r", encoding="utf-8") as fp:
             reader = csv.reader(fp)
+            next(reader, None)  # skip header row if present
             for row in reader:
                 if not row:
                     continue
@@ -94,8 +101,8 @@ def trace_duration_seconds(path: Path) -> float:
                     continue
         if last_time <= 0.0:
             return 0.0
-        if last_time >= 1e4:  # assume milliseconds
-            return last_time / 1000.0
+        # if last_time >= 1e4:  # assume milliseconds
+        #     return last_time / 1000.0
         return last_time
     except Exception:
         return 0.0
@@ -125,6 +132,12 @@ def main():
     print(f"Sim-step:        {args.sim_step or os.getenv('SIM_STEP_TIME_DEFAULT', 'default=1.0')}")
     print(f"Decision period: {args.decision_period or os.getenv('DQN_PRB_DECISION_PERIOD_STEPS', 'default=1')}")
     print(f"Trace speedup:   {args.trace_speedup}")
+    trace_bin_display = (
+        args.trace_bin
+        if args.trace_bin is not None
+        else os.getenv("TRACE_BIN", "inherit-from-settings/config")
+    )
+    print(f"Trace bin:       {trace_bin_display}")
     print(f"Log file:        {args.log_file}")
     print("===============================\n")
 
@@ -154,7 +167,24 @@ def main():
                 logf.write(msg + "\n")
             else:
                 effective = duration_s / max(1e-9, args.trace_speedup)
-                steps = max(1, math.ceil(effective / spd))
+                #steps = max(1, math.ceil(effective / spd))
+                steps = max(1, int(effective / spd))
+
+            embb_slice = {
+                "ue_count": ue_count,
+                "trace": str(trace_embb),
+                "trace_speedup": args.trace_speedup,
+                **({"ue_ip": args.embb_ue_ip} if args.embb_ue_ip else {}),
+            }
+            urllc_slice = {
+                "ue_count": ue_count,
+                "trace": str(trace_urllc),
+                "trace_speedup": args.trace_speedup,
+                **({"ue_ip": args.urllc_ue_ip} if args.urllc_ue_ip else {}),
+            }
+            if args.trace_bin is not None:
+                embb_slice["trace_bin"] = args.trace_bin
+                urllc_slice["trace_bin"] = args.trace_bin
 
             episodes.append(
                 {
@@ -163,18 +193,8 @@ def main():
                     "freeze_mobility": True,
                     "initial_prb": {"eMBB": prb_embb, "URLLC": prb_urllc},
                     "slices": {
-                        "eMBB": {
-                            "ue_count": ue_count,
-                            "trace": str(trace_embb),
-                            "trace_speedup": args.trace_speedup,
-                            **({"ue_ip": args.embb_ue_ip} if args.embb_ue_ip else {}),
-                        },
-                        "URLLC": {
-                            "ue_count": ue_count,
-                            "trace": str(trace_urllc),
-                            "trace_speedup": args.trace_speedup,
-                            **({"ue_ip": args.urllc_ue_ip} if args.urllc_ue_ip else {}),
-                        },
+                        "eMBB": embb_slice,
+                        "URLLC": urllc_slice,
                     },
                 }
             )
