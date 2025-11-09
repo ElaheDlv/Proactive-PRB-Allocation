@@ -139,7 +139,9 @@ class PRBGymEnv:
         self._managed_ues: set[str] = set()
         self._trace_cache: Dict[Tuple[str, str, float], List[Tuple[float, float, float]]] = {}
         self._action_combos = list(product([-1, 0, 1], repeat=2))
-        self._state_dim = 8
+        self._prev_action_vec = np.zeros(len(self._action_combos), dtype=np.float32)
+        # state captures 3 metrics per slice plus previous action one-hot encoding
+        self._state_dim = 6 + len(self._action_combos)
         self._catalog_done = False
         self._episode_progress_bar = None
         self._progress_interval = max(1, int(getattr(settings, "PRB_GYM_PROGRESS_INTERVAL", 1000)))
@@ -235,6 +237,7 @@ class PRBGymEnv:
         self._episode_step_limit = self._current_episode["duration_steps"]
         self._steps_in_episode = 0
         self._deploy_episode(self._current_episode)
+        self._prev_action_vec = np.zeros(len(self._action_combos), dtype=np.float32)
         total = len(self._episodes)
         print(f"PRBGymEnv: episode {self._episode_idx + 1}/{total} -> '{self._current_episode['id']}' ({self._episode_step_limit} decisions)")
         self._reset_progress_bar()
@@ -350,24 +353,23 @@ class PRBGymEnv:
 
     # ------------------------------------------------------------------ Observation / reward
     def _get_state(self):
-        """Build the observation vector (8 elements) from the single training cell."""
+        """Build the observation vector (6 + action_dim elements) from the single training cell."""
         cell = self._target_cell()
         if cell is None:
             return np.zeros(self._state_dim, dtype=np.float32)
         agg = self._aggregate_slice_metrics(cell)
         state = []
-        max_ue = float(getattr(settings, "UE_DEFAULT_MAX_COUNT", 50))
         max_prb = max(1.0, float(getattr(cell, "max_dl_prb", 1)))
         dl_norm = max(1e-9, self.norm_dl_mbps)
         buf_norm = max(1e-9, self.norm_buf_bytes)
         for sl in (SL_E, SL_U):
             data = agg[sl]
             state.extend([
-                self._clamp01(data["ue_count"] / max_ue),
                 self._clamp01(data["slice_prb"] / max_prb),
                 self._clamp01(data["tx_mbps"] / dl_norm),
                 self._clamp01(data["buf_bytes"] / buf_norm),
                 ])
+        state.extend(self._prev_action_vec.tolist())
         return np.asarray(state, dtype=np.float32)
 
     def _aggregate_slice_metrics(self, cell):
@@ -419,12 +421,7 @@ class PRBGymEnv:
             score = self._slice_score(latency_avg, sl)
             bonus = self._slice_bonus(latency_avg, sl)
             slice_prb = float(data.get("slice_prb", 0.0) or 0.0)
-            prb_pen = self._slice_prb_penalty(
-                slice_prb,
-                sl,
-                max_prb,
-                latency_avg,
-            )
+            prb_pen = self._slice_prb_penalty(slice_prb, sl, max_prb, score)
             score = max(0.0, score - prb_pen)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
@@ -482,8 +479,8 @@ class PRBGymEnv:
     def _init_prb_penalty(self) -> Dict[str, float]:
         """Per-slice coefficients penalising large PRB quotas."""
         return {
-            SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 0.01)),
-            SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 0.02)),
+            SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 1)),
+            SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 1)),
         }
 
     def _init_latency_sigmoid(self) -> Dict[str, float]:
@@ -526,22 +523,21 @@ class PRBGymEnv:
         under = max(0.0, target - latency_avg)
         return coeff * (under / target)
 
-    def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, latency_avg: float) -> float:
-        """Penalty applied only when latency already meets target, scaled quadratically by PRB usage."""
+    def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
+        """Penalty proportional to PRB usage but suppressed when latency score is low."""
         coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
         if coeff <= 0.0:
             return 0.0
-        target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
-        if latency_avg > target:
-            return 0.0
         usage = max(0.0, slice_prb) / max(1e-6, max_prb)
-        return coeff * (usage ** 2)
+        #slack = max(0.0, 1.0 - float(score))
+        slack = float(score)
+        return coeff * usage * slack
 
     def _reset_progress_bar(self):
         self._episode_progress_bar = None
         self._log_progress(reset=True)
 
-    def _log_progress(self, done=False, reset=False):
+    def _log_progress(self, done=False, reset=False, progress_override=None):
         if not self._episode_progress_bar:
             total = max(1, self._episode_step_limit)
             bar_length = 40
@@ -551,16 +547,17 @@ class PRBGymEnv:
             }
         total = self._episode_progress_bar["total"]
         bar_length = self._episode_progress_bar["bar_length"]
-        progress = min(total, self._steps_in_episode)
+        current_progress = self._steps_in_episode if progress_override is None else progress_override
+        progress = min(total, current_progress)
         filled = int(bar_length * progress / total)
         bar = "#" * filled + "-" * (bar_length - filled)
         percent = 100.0 * progress / total
         msg = f"Episode {self._episode_idx + 1}/{len(self._episodes)} [{bar}] {percent:5.1f}% ({progress}/{total})"
-        if done:
-            msg += " ✓"
         if reset:
             msg += " (reset)"
         print(msg)
+        if done:
+            print(f"Episode {self._episode_idx + 1}/{len(self._episodes)} completed ✓")
 
     # ------------------------------------------------------------------ Step
     def step(self, action_idx: int):
@@ -568,13 +565,22 @@ class PRBGymEnv:
         if cell is None:
             return self._get_state(), 0.0, True, {}
         self._apply_action(cell, action_idx)  # mutate slice quotas
+        self._prev_action_vec = self._one_hot_action(action_idx)
         reward = self._reward(cell)           # compute shaped reward
         state = self._get_state()             # observe next state
         self._steps_in_episode += 1
         done = self._steps_in_episode >= self._episode_step_limit or self._traces_consumed()
         info = {"episode_id": self._current_episode["id"], "step": self._steps_in_episode}
-        if self._steps_in_episode % self._progress_interval == 0 or done:
-            self._log_progress(done)
+        logged = False
+        if self._steps_in_episode % self._progress_interval == 0:
+            self._log_progress()
+            logged = True
+        if done:
+            if not logged:
+                self._log_progress(done=True)
+            else:
+                # ensure completion note even if progress just printed
+                self._log_progress(done=True, progress_override=self._steps_in_episode)
         return state, reward, done, info
 
     def _apply_action(self, cell, action_idx: int):
@@ -639,6 +645,12 @@ class PRBGymEnv:
         if requested <= 0.0:
             return 1.0 if granted <= 0.0 else max(0.0, min(1.0, granted / max_prb))
         return max(0.0, min(1.0, granted / max(1.0, requested)))
+
+    def _one_hot_action(self, action_idx: int) -> np.ndarray:
+        vec = np.zeros(len(self._action_combos), dtype=np.float32)
+        if 0 <= action_idx < len(vec):
+            vec[action_idx] = 1.0
+        return vec
 
 class xAppGymPRBAllocator(xAppBase):
     """Standalone Gym-style DQN xApp (eMBB/URLLC, episodic).
