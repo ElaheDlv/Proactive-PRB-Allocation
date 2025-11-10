@@ -268,9 +268,14 @@ PRB_GYM_ENABLE = os.getenv("PRB_GYM_ENABLE", "0") in ("1", "true", "True")
 PRB_GYM_CONFIG_PATH = os.getenv("PRB_GYM_CONFIG_PATH", "")
 PRB_GYM_LOOP = os.getenv("PRB_GYM_LOOP", "0") in ("1", "true", "True")
 try:
-    PRB_GYM_EPS_DECAY_PER_EPISODE = int(os.getenv("PRB_GYM_EPS_DECAY_PER_EPISODE", "2000"))
+    _gym_decay_raw = os.getenv("PRB_GYM_EPS_DECAY_STEPS")
+    if _gym_decay_raw is None:
+        _gym_decay_raw = os.getenv("PRB_GYM_EPS_DECAY_PER_EPISODE", "2000")
+    PRB_GYM_EPS_DECAY_STEPS = int(_gym_decay_raw)
 except Exception:
-    PRB_GYM_EPS_DECAY_PER_EPISODE = 2000
+    PRB_GYM_EPS_DECAY_STEPS = 2000
+# Backward compatibility for existing configs/tests
+PRB_GYM_EPS_DECAY_PER_EPISODE = PRB_GYM_EPS_DECAY_STEPS
 
 
 RAN_TOPOLOGY_PRESET = os.getenv("RAN_TOPOLOGY_PRESET", "default")  # 'default' or 'simple'

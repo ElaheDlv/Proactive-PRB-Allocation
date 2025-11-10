@@ -168,7 +168,7 @@ parser.add_argument("--prb-gym-loop", action="store_true", help="Loop the Gym-st
 parser.add_argument(
     "--prb-gym-eps-decay",
     type=int,
-    help="Per-episode epsilon decay steps for the Gym-style PRB allocator",
+    help="Global epsilon decay steps for the Gym-style PRB allocator (total decisions)",
 )
 # Trace replay options
 parser.add_argument(
@@ -386,6 +386,8 @@ if args.prb_gym_eps_decay is not None:
     except Exception:
         _pg_decay = None
     if _pg_decay:
+        os.environ["PRB_GYM_EPS_DECAY_STEPS"] = str(_pg_decay)
+        # Legacy name for older configs
         os.environ["PRB_GYM_EPS_DECAY_PER_EPISODE"] = str(_pg_decay)
 
 # Trace mapping and options (export via env before importing settings)

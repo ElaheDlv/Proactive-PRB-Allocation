@@ -279,7 +279,7 @@ class PRBGymEnv:
         """Spawn a scripted UE, optionally pinning mobility and attaching traces."""
         if self.sim_engine is None:
             return
-        max_attempts = max(1, int(getattr(settings, "PRB_GYM_REGISTER_RETRIES", 10)))
+        max_attempts = max(1, int(getattr(settings, "PRB_GYM_REGISTER_RETRIES", 20)))
         ok = False
         attempt = 0
         while attempt < max_attempts:
@@ -380,6 +380,8 @@ class PRBGymEnv:
                 "buf_bytes": 0.0,
                 "latency_sum": 0.0,
                 "latency_count": 0,
+                "prb_req": 0.0,
+                "prb_granted": 0.0,
             },
             SL_U: {
                 "ue_count": 0,
@@ -388,8 +390,12 @@ class PRBGymEnv:
                 "buf_bytes": 0.0,
                 "latency_sum": 0.0,
                 "latency_count": 0,
+                "prb_req": 0.0,
+                "prb_granted": 0.0,
             },
         }
+        req_map = getattr(cell, "dl_total_prb_demand", {}) or {}
+        alloc_map = getattr(cell, "prb_ue_allocation_dict", {}) or {}
         for ue in getattr(cell, "connected_ue_list", {}).values():
             sl = getattr(ue, "slice_type", None)
             if sl not in agg:
@@ -399,6 +405,12 @@ class PRBGymEnv:
             agg[sl]["buf_bytes"] += float(getattr(ue, "dl_buffer_bytes", 0.0) or 0.0)
             agg[sl]["latency_sum"] += float(getattr(ue, "downlink_latency", 0.0) or 0.0)
             agg[sl]["latency_count"] += 1
+            imsi = getattr(ue, "ue_imsi", None)
+            if not imsi:
+                continue
+            agg[sl]["prb_req"] += float(req_map.get(imsi, 0.0) or 0.0)
+            alloc = alloc_map.get(imsi, {}) or {}
+            agg[sl]["prb_granted"] += float(alloc.get("downlink", 0.0) or 0.0)
         return agg
 
     def _reward(self, cell):
@@ -422,6 +434,13 @@ class PRBGymEnv:
             score = max(0.0, score - prb_pen)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
+            demand_prb = max(0.0, float(data.get("prb_req", 0.0) or 0.0))
+            granted_prb = max(0.0, float(data.get("prb_granted", 0.0) or 0.0))
+            if demand_prb <= 0.0:
+                denom = max(1.0, slice_prb)
+            else:
+                denom = max(1.0, demand_prb)
+            grant_ratio = self._clamp01(granted_prb / denom)
             scores[sl] = {
                 "score": score,
                 "bonus": bonus,
@@ -431,6 +450,10 @@ class PRBGymEnv:
                 "latency": latency_avg,
                 "buf_bytes": buf_bytes,
                 "tx_mbps": tx_mbps,
+                "satisfaction": grant_ratio,
+                "prb_grant_ratio": grant_ratio,
+                "prb_req": demand_prb,
+                "prb_granted": granted_prb,
             }
             weighted += weights[sl] * score
             bonus_total += bonus
@@ -724,7 +747,7 @@ class xAppGymPRBAllocator(xAppBase):
         self._setup_tensorboard()
         self._state_window: deque = deque(maxlen=self.seq_len)
         self._episode_step_count = 0
-        self._eps_decay_per_episode = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_PER_EPISODE", 2000)))
+        self._eps_decay_steps = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_STEPS", 2000)))
         self._last_save_step = -1
         self._episode_return = 0.0
         self._episode_counter = 0
@@ -819,8 +842,8 @@ class xAppGymPRBAllocator(xAppBase):
             return int(torch.argmax(q_vals, dim=1).item())
 
     def _epsilon(self):
-        """Episode-aware epsilon decay schedule."""
-        frac = min(1.0, self._episode_step_count / float(self._eps_decay_per_episode))
+        """Global epsilon decay schedule based on total training steps."""
+        frac = min(1.0, self.timestep / float(self._eps_decay_steps))
         return self.eps_start + (self.eps_end - self.eps_start) * frac
 
     def _optimize(self):
@@ -915,6 +938,10 @@ class xAppGymPRBAllocator(xAppBase):
                 self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
                 self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
+                if "satisfaction" in metrics:
+                    self._tb.add_scalar(f"train/{label}/satisfaction", float(metrics["satisfaction"]), self.timestep)
+                if "prb_grant_ratio" in metrics:
+                    self._tb.add_scalar(f"train/{label}/prb_grant_ratio", float(metrics["prb_grant_ratio"]), self.timestep)
             if self.timestep % (self._tb_interval * 10) == 0:
                 counts = [self._action_counts.get(i, 0) for i in range(self.n_actions)]
                 self._tb.add_histogram("actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
