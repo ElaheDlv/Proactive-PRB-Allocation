@@ -537,7 +537,7 @@ class PRBGymEnv:
         self._episode_progress_bar = None
         self._log_progress(reset=True)
 
-    def _log_progress(self, done=False, reset=False, progress_override=None):
+    def _log_progress(self, done=False, reset=False):
         if not self._episode_progress_bar:
             total = max(1, self._episode_step_limit)
             bar_length = 40
@@ -547,8 +547,7 @@ class PRBGymEnv:
             }
         total = self._episode_progress_bar["total"]
         bar_length = self._episode_progress_bar["bar_length"]
-        current_progress = self._steps_in_episode if progress_override is None else progress_override
-        progress = min(total, current_progress)
+        progress = min(total, self._steps_in_episode)
         filled = int(bar_length * progress / total)
         bar = "#" * filled + "-" * (bar_length - filled)
         percent = 100.0 * progress / total

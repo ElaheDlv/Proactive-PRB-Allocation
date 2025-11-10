@@ -103,6 +103,13 @@ try:
 except Exception:
     TRACE_UL_BUFFER_LIMIT_BYTES = 64 * 1024 * 1024
 
+# Fallback throughput (bps) used to translate stalled DL buffers into latency when
+# radio capacity is momentarily zero. Keep extremely small to surface large delays.
+try:
+    TRACE_LATENCY_STALL_BPS = float(os.getenv("TRACE_LATENCY_STALL_BPS", "1.0"))
+except Exception:
+    TRACE_LATENCY_STALL_BPS = 1.0
+
 # Trace debug controls
 TRACE_DEBUG = os.getenv("TRACE_DEBUG", "0") in ("1", "true", "True")
 TRACE_DEBUG_IMSI = set([

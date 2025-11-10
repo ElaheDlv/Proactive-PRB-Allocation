@@ -420,8 +420,20 @@ class Cell:
                 #transmission_delay = (take * 8) / served_bps if served_bps > 0 else 0
                 #print("Transmission Delay:", transmission_delay)
                 transmission_delay = 0.0
-                # Queuing delay: remaining buffer to be served
-                queuing_delay = (ue.dl_buffer_bytes * 8) / cap_bps if cap_bps > 0 else 0
+                # Queuing delay: remaining buffer to be served. When capacity collapses
+                # to zero we still expose a backlog-derived latency using a tiny
+                # fallback rate so dashboards/xApps can see the stall instead of 0.
+                backlog_bytes = max(0, int(getattr(ue, "dl_buffer_bytes", 0) or 0))
+                backlog_bits = backlog_bytes * 8
+                if cap_bps > 0:
+                    queuing_delay = backlog_bits / cap_bps
+                elif backlog_bits > 0:
+                    stall_bps = max(
+                        1e-9, float(getattr(settings, "TRACE_LATENCY_STALL_BPS", 1.0) or 1.0)
+                    )
+                    queuing_delay = backlog_bits / stall_bps
+                else:
+                    queuing_delay = 0.0
                 #print("Queuing Delay:", queuing_delay)
                 # Total downlink latency
                 ue.downlink_latency = transmission_delay + queuing_delay

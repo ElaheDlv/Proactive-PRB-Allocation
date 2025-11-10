@@ -78,6 +78,7 @@ class BaseStation:
             return False
         period_hint = getattr(settings, "TRACE_BIN", None)
         period = float(estimate_trace_period(samples, default_step=period_hint))
+        print(f"Estimated trace period: {period} s")
         self._dl_replay[ue_imsi] = {
             "samples": list(samples),
             "idx": 0,
@@ -150,6 +151,8 @@ class BaseStation:
                 # Drain all samples whose timestamps are <= current clock. Each sample time is
                 # compared against the scaled replay clock so late-arriving bins get enqueued
                 # exactly once per cycle.
+                # if int(clock) % 100 == 0:
+                #     print(f"[trace-ts] {imsi}: sample_t={samples[idx][0]:.6f}s clock={clock:.6f}s idx={idx}")
                 while idx < n and float(samples[idx][0]) <= clock:
                     dl = int(samples[idx][1] or 0)
                     if dl > 0:
