@@ -165,6 +165,7 @@ parser.add_argument("--sb3-dqn-save-interval", type=int, help="Autosave interval
 parser.add_argument("--prb-gym", action="store_true", help="Enable Gym-style PRB allocator xApp")
 parser.add_argument("--prb-gym-config", type=str, help="Episode config JSON for the Gym-style PRB xApp")
 parser.add_argument("--prb-gym-loop", action="store_true", help="Loop the Gym-style episode catalog")
+parser.add_argument("--prb-gym-shuffle", action="store_true", help="Shuffle Gym-style episode order (reshuffled each loop)")
 parser.add_argument(
     "--prb-gym-eps-decay",
     type=int,
@@ -380,6 +381,8 @@ if args.prb_gym_config:
     os.environ["PRB_GYM_CONFIG_PATH"] = args.prb_gym_config
 if args.prb_gym_loop:
     os.environ["PRB_GYM_LOOP"] = "1"
+if args.prb_gym_shuffle:
+    os.environ["PRB_GYM_SHUFFLE_EPISODES"] = "1"
 if args.prb_gym_eps_decay is not None:
     try:
         _pg_decay = max(1, int(args.prb_gym_eps_decay))

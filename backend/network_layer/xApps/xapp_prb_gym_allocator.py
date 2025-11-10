@@ -131,6 +131,9 @@ class PRBGymEnv:
         self._latency_tail = self._init_latency_tail()
 
         self._episodes = self._load_episode_specs()
+        self._shuffle_catalog = bool(getattr(settings, "PRB_GYM_SHUFFLE_EPISODES", False))
+        if self._shuffle_catalog and self._episodes:
+            random.shuffle(self._episodes)
         self._episode_loop = getattr(settings, "PRB_GYM_LOOP", False)
         self._episode_idx = -1
         self._current_episode = None
@@ -230,6 +233,8 @@ class PRBGymEnv:
                 print("PRBGymEnv: episode catalog exhausted; stopping further resets.")
                 self._catalog_done = True
                 return None
+            if self._shuffle_catalog and self._episodes:
+                random.shuffle(self._episodes)
             next_idx = 0
         self._episode_idx = next_idx
         self._current_episode = self._episodes[next_idx]
@@ -499,8 +504,8 @@ class PRBGymEnv:
     def _init_prb_penalty(self) -> Dict[str, float]:
         """Per-slice coefficients penalising large PRB quotas."""
         return {
-            SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 1)),
-            SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 1)),
+            SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 0.5)),
+            SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 0.5)),
         }
 
     def _init_latency_sigmoid(self) -> Dict[str, float]:
