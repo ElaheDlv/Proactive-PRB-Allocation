@@ -671,9 +671,22 @@ python -m backend.tools.convert_training_configs_to_gym_catalog \
   --trace-bin 0 \
   --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
 
+
+  python -m backend.tools.convert_training_configs_to_gym_catalog --input backend/notebooks/xapp_dqn_training_configs.json --trace-root backend/notebooks/Unified_CMTC/traces/aligned --output backend/assets/episodes/gym_from_training_config_10ms_nobin.json --sim-step 0.01 --decision-period 1 --trace-bin 0 --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
+
 Passing `--trace-bin 0` stamps each slice in the generated Gym catalog with `trace_bin: 0`, which the xApp propagates to `load_raw_packet_csv`; the simulator then replays traffic strictly according to the CSV `time` column (no implicit per-line binning).
 
+python backend/main.py \
+  --preset simple --mode headless --freeze-mobility \
+  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
+  --prb-gym-loop --prb-gym-shuffle \
+  --prb-const --prb-const-embb 120 --prb-const-urllc 40 --prb-const-log-interval 500 \
+  --sim-step 0.01 --trace-bin 0.01 --strict-real-traffic \
+  --steps 200000 --ws-port 8782 --dash-port 8072
 
+
+
+  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_simpler.json --prb-gym-shuffle --prb-const --prb-const-embb 120 --prb-const-urllc 40 --prb-const-log-interval 500 --sim-step 0.01 --trace-bin 0.01 --strict-real-traffic --steps 200000 --dqn-log-tb --ws-port 8782 --dash-port 8072
 
 
 ##############################################################

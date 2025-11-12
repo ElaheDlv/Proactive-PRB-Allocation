@@ -171,6 +171,14 @@ parser.add_argument(
     type=int,
     help="Global epsilon decay steps for the Gym-style PRB allocator (total decisions)",
 )
+parser.add_argument("--prb-const", action="store_true", help="Enable constant-PRB allocator xApp")
+parser.add_argument("--prb-const-embb", type=int, help="Constant PRBs to reserve for the eMBB slice")
+parser.add_argument("--prb-const-urllc", type=int, help="Constant PRBs to reserve for the URLLC slice")
+parser.add_argument(
+    "--prb-const-log-interval",
+    type=int,
+    help="Logging interval (steps) for the constant PRB allocator diagnostics",
+)
 # Trace replay options
 parser.add_argument(
     "--trace-speedup",
@@ -392,6 +400,14 @@ if args.prb_gym_eps_decay is not None:
         os.environ["PRB_GYM_EPS_DECAY_STEPS"] = str(_pg_decay)
         # Legacy name for older configs
         os.environ["PRB_GYM_EPS_DECAY_PER_EPISODE"] = str(_pg_decay)
+if args.prb_const:
+    os.environ["PRB_CONST_ALLOC_ENABLE"] = "1"
+if args.prb_const_embb is not None:
+    os.environ["PRB_CONST_ALLOC_EMBB"] = str(max(0, int(args.prb_const_embb)))
+if args.prb_const_urllc is not None:
+    os.environ["PRB_CONST_ALLOC_URLLC"] = str(max(0, int(args.prb_const_urllc)))
+if args.prb_const_log_interval is not None:
+    os.environ["PRB_CONST_LOG_INTERVAL"] = str(max(1, int(args.prb_const_log_interval)))
 
 # Trace mapping and options (export via env before importing settings)
 if args.trace_speedup is not None:

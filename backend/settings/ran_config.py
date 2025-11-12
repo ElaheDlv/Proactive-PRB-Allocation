@@ -277,6 +277,28 @@ except Exception:
     PRB_GYM_EPS_DECAY_STEPS = 2000
 # Backward compatibility for existing configs/tests
 PRB_GYM_EPS_DECAY_PER_EPISODE = PRB_GYM_EPS_DECAY_STEPS
+PRB_CONST_ALLOC_ENABLE = os.getenv("PRB_CONST_ALLOC_ENABLE", "0") in ("1", "true", "True")
+def _const_alloc_env(key):
+    val = os.getenv(key)
+    if val is None:
+        return None
+    try:
+        return max(0, int(val))
+    except Exception:
+        return None
+PRB_CONST_ALLOC_MAP = {}
+_embb_name = locals().get("NETWORK_SLICE_EMBB_NAME", "eMBB")
+_urllc_name = locals().get("NETWORK_SLICE_URLLC_NAME", "URLLC")
+_embb_val = _const_alloc_env("PRB_CONST_ALLOC_EMBB")
+_urllc_val = _const_alloc_env("PRB_CONST_ALLOC_URLLC")
+if _embb_val is not None:
+    PRB_CONST_ALLOC_MAP[_embb_name] = _embb_val
+if _urllc_val is not None:
+    PRB_CONST_ALLOC_MAP[_urllc_name] = _urllc_val
+try:
+    PRB_CONST_LOG_INTERVAL = max(1, int(os.getenv("PRB_CONST_LOG_INTERVAL", "500")))
+except Exception:
+    PRB_CONST_LOG_INTERVAL = 500
 
 
 RAN_TOPOLOGY_PRESET = os.getenv("RAN_TOPOLOGY_PRESET", "default")  # 'default' or 'simple'
