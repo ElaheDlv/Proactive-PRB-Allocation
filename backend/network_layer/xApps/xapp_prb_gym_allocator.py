@@ -125,7 +125,7 @@ class PRBGymEnv:
             self.w_u /= total_w
         self._latency_targets = self._init_latency_targets()
         self._latency_spans = self._init_latency_spans()
-        #self._latency_bonus = self._init_latency_bonus()
+        self._latency_bonus = self._init_latency_bonus()
         self._prb_penalty = self._init_prb_penalty()
         self._latency_sigmoid = self._init_latency_sigmoid()
         self._latency_tail = self._init_latency_tail()
@@ -425,7 +425,7 @@ class PRBGymEnv:
         scores: Dict[str, Dict[str, float]] = {}
         weights = {SL_E: self.w_e, SL_U: self.w_u}
         weighted = 0.0
-        #bonus_total = 0.0
+        bonus_total = 0.0
         for sl in (SL_E, SL_U):
             data = agg[sl]
             latency_avg = 0.0
@@ -433,10 +433,10 @@ class PRBGymEnv:
             if cnt > 0:
                 latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
             score = self._slice_score(latency_avg, sl)
-            #bonus = self._slice_bonus(latency_avg, sl)
+            bonus = self._slice_bonus(latency_avg, sl)
             slice_prb = float(data.get("slice_prb", 0.0) or 0.0)
             prb_pen = self._slice_prb_penalty(slice_prb, sl, max_prb, score)
-            #score = max(0.0, score - prb_pen)
+            score = max(0.0, score - prb_pen)
             score = max(0.0, score)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
@@ -449,7 +449,7 @@ class PRBGymEnv:
             grant_ratio = self._clamp01(granted_prb / denom)
             scores[sl] = {
                 "score": score,
-                #"bonus": bonus,
+                "bonus": bonus,
                 "prb_penalty": prb_pen,
                 "prb_usage_norm": slice_prb / max_prb,
                 "prb_usage_prb": slice_prb,
@@ -462,9 +462,9 @@ class PRBGymEnv:
                 "prb_granted": granted_prb,
             }
             weighted += weights[sl] * score
-            #bonus_total += bonus
-        #total_reward = max(0, min(1.0, weighted + bonus_total))
-        total_reward = max(0, min(1.0, weighted))
+            bonus_total += bonus
+        total_reward = max(0, min(1.0, weighted + bonus_total))
+        #total_reward = max(0, min(1.0, weighted))
         return total_reward, scores
     
     # def _reward(self, cell):
@@ -555,12 +555,12 @@ class PRBGymEnv:
             SL_U: _span(SL_U, 5.0),   # URLLC score hits zero quickly (~3 ms)
         }
 
-    # def _init_latency_bonus(self) -> Dict[str, float]:
-    #     """Per-slice coefficients for rewarding sub-target latency."""
-    #     return {
-    #         SL_E: float(getattr(settings, "PRB_GYM_LAT_BONUS_EMBB", 0.02)),
-    #         SL_U: float(getattr(settings, "PRB_GYM_LAT_BONUS_URLLC", 0.05)),
-    #     }
+    def _init_latency_bonus(self) -> Dict[str, float]:
+        """Per-slice coefficients for rewarding sub-target latency."""
+        return {
+            SL_E: float(getattr(settings, "PRB_GYM_LAT_BONUS_EMBB", 0.02)),
+            SL_U: float(getattr(settings, "PRB_GYM_LAT_BONUS_URLLC", 0.05)),
+        }
 
     def _init_prb_penalty(self) -> Dict[str, float]:
         """Per-slice coefficients penalising large PRB quotas."""
@@ -601,24 +601,24 @@ class PRBGymEnv:
         eps = 1e-3
         return max(eps, min(1.0 - eps, score))
 
-    # def _slice_bonus(self, latency_avg: float, slice_name: str) -> float:
-    #     """Additional reward for staying below the latency budget."""
-    #     coeff = max(0.0, self._latency_bonus.get(slice_name, 0.0))
-    #     if coeff <= 0.0:
-    #         return 0.0
-    #     target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
-    #     under = max(0.0, target - latency_avg)
-    #     return coeff * (under / target)
+    def _slice_bonus(self, latency_avg: float, slice_name: str) -> float:
+        """Additional reward for staying below the latency budget."""
+        coeff = max(0.0, self._latency_bonus.get(slice_name, 0.0))
+        if coeff <= 0.0:
+            return 0.0
+        target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+        under = max(0.0, target - latency_avg)
+        return coeff * (under / target)
 
-    # def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
-    #     """Penalty proportional to PRB usage but suppressed when latency score is low."""
-    #     coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
-    #     if coeff <= 0.0:
-    #         return 0.0
-    #     usage = max(0.0, slice_prb) / max(1e-6, max_prb)
-    #     #slack = max(0.0, 1.0 - float(score))
-    #     slack = float(score)
-    #     return coeff * usage * slack
+    def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
+        """Penalty proportional to PRB usage but suppressed when latency score is low."""
+        coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
+        if coeff <= 0.0:
+            return 0.0
+        usage = max(0.0, slice_prb) / max(1e-6, max_prb)
+        #slack = max(0.0, 1.0 - float(score))
+        slack = float(score)
+        return coeff * usage * slack
     
     def _slice_prb_penalty(self, slice_prb, slice_name, max_prb, score):
         coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
