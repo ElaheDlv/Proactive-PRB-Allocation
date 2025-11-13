@@ -1,0 +1,4604 @@
+{
+  "episodes": [
+    {
+      "id": "cfg_00000",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00001",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00002",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00003",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00004",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00005",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00006",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00007",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00008",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00009",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00010",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00011",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00012",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00013",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00014",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00015",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00016",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00017",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00018",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00019",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00020",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00021",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00022",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00023",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00024",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00025",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00026",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00027",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00028",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00029",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00030",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00031",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00032",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00033",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00034",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00035",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00036",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00037",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00038",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00039",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00040",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00041",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00042",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00043",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00044",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00045",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00046",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00047",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00048",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00049",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00050",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00051",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00052",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00053",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00054",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00055",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00056",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00057",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00058",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00059",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00060",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00061",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00062",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00063",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00064",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00065",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00066",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00067",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00068",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00069",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00070",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00071",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00072",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00073",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00074",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00075",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00076",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00077",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00078",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00079",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00080",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00081",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00082",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00083",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00084",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00085",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00086",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00087",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00088",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00089",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00090",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00091",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00092",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00093",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00094",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00095",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00096",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00097",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00098",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00099",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00100",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00101",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00102",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00103",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00104",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00105",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00106",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00107",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00108",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00109",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00110",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00111",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00112",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00113",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00114",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00115",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00116",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00117",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00118",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00119",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00120",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00121",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00122",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00123",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00124",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00125",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00126",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00127",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00128",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00129",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00130",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00131",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00132",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00133",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00134",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00135",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00136",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00137",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00138",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00139",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00140",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00141",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00142",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00143",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00144",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00145",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00146",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00147",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00148",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00149",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00150",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00151",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00152",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00153",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00154",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00155",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00156",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00157",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00158",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00159",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00160",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00161",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00162",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00163",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00164",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00165",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00166",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00167",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00168",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00169",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00170",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00171",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00172",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00173",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00174",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00175",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00176",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00177",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00178",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00179",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00180",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00181",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00182",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00183",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00184",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00185",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00186",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00187",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00188",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00189",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00190",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00191",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00192",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00193",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00194",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00195",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00196",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00197",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00198",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00199",
+      "duration_steps": 3997,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/eMBB_M2_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned/URLLC_M1_std1_5_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    }
+  ]
+}
