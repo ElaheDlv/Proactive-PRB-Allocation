@@ -689,6 +689,20 @@ python backend/main.py \
   python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_simpler.json --prb-gym-shuffle --prb-const --prb-const-embb 120 --prb-const-urllc 40 --prb-const-log-interval 500 --sim-step 0.01 --trace-bin 0.01 --strict-real-traffic --steps 200000 --dqn-log-tb --ws-port 8782 --dash-port 8072
 
 
+
+
+python backend/main.py \
+  --preset simple --mode headless --freeze-mobility \
+  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
+  --prb-gym-shuffle \
+  --dqn-train --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 \
+  --sim-step 0.01 --trace-bin 0.01 \
+  --dqn-period 1 --dqn-move-step 5 \
+  --dqn-lr 5e-4 --dqn-target-update 2000 \
+  --dqn-epsilon-start 0.5 --dqn-epsilon-end 0.05 --prb-gym-eps-decay 5000000 \
+  --dqn-log-tb --steps 5500000 --dqn-save-interval 10000 \
+  --strict-real-traffic --ws-port 8782 --dash-port 8072
+  
 ##############################################################
     python backend/main.py --preset simple --mode server \
     --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
