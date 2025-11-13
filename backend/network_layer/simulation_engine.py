@@ -311,8 +311,17 @@ class SimulationEngine(metaclass=utils.SingletonMeta):
         if not ue:
             logger.warning(f"UE {ue_imsi} not found in simulation.")
             return False
-        # Deregister from CoreNetwork
-        if self.core_network:
+        # Ask the UE (and therefore the serving gNB) to release resources first so
+        # replay queues, PRB state, and slice allocations are reset between episodes.
+        released = False
+        try:
+            if ue.current_bs is not None:
+                ue.deregister()
+                released = True
+        except Exception as exc:
+            logger.warning(f"UE {ue_imsi} deregistration via serving gNB failed: {exc}")
+        if not released and self.core_network:
+            # Fallback: ensure the core drops the UE even if it never attached.
             self.core_network.handle_deregistration_request(ue)
         # Remove from SimulationEngine's list
         del self.ue_list[ue_imsi]

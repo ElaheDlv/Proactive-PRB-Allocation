@@ -193,8 +193,18 @@ class BaseStation:
 
     def handle_deregistration_request(self, ue):
         self.core_network.handle_deregistration_request(ue)
-        # for simplicity, gNB directly releases resources instead of having AMF to initiate the release
-        ue.current_cell.deregister_ue(ue)
+        # Release radio resources where the UE was anchored (if any).
+        cell = getattr(ue, "current_cell", None)
+        if cell is not None:
+            cell.deregister_ue(ue)
+        # Drop UE-specific DL buffer and trace replay state so future episodes start clean.
+        try:
+            if hasattr(self, "_dl_buf"):
+                self._dl_buf.pop(ue.ue_imsi, None)
+            if hasattr(self, "_dl_replay"):
+                self._dl_replay.pop(ue.ue_imsi, None)
+        except Exception:
+            pass
         if ue.ue_imsi in self.ue_registry:
             del self.ue_registry[ue.ue_imsi]
 
