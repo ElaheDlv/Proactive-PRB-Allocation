@@ -846,6 +846,11 @@ class xAppGymPRBAllocator(xAppBase):
         self._reward_running_avg = 0.0
         self._reward_running_init = False
         self._cumulative_return = 0.0
+        self.expected_return_gamma = float(getattr(settings, "PRB_GYM_EXPECTED_RETURN_GAMMA", 0.95))
+        if not (0.0 <= self.expected_return_gamma < 1.0):
+            self.expected_return_gamma = 0.95
+        self._expected_return = 0.0
+        self._expected_return_init = False
 
     def start(self):
         """Reset the environment and print a short banner."""
@@ -862,6 +867,8 @@ class xAppGymPRBAllocator(xAppBase):
         self._cumulative_return = 0.0
         self._reward_running_avg = 0.0
         self._reward_running_init = False
+        self._expected_return = 0.0
+        self._expected_return_init = False
         print(f"{self.xapp_id}: enabled (state_dim={self.state_dim}, actions={self.n_actions})")
 
     def step(self):
@@ -890,6 +897,11 @@ class xAppGymPRBAllocator(xAppBase):
         reward, slice_metrics = reward_info
         self._episode_return += reward
         self._cumulative_return += reward
+        if not self._expected_return_init:
+            self._expected_return = reward
+            self._expected_return_init = True
+        else:
+            self._expected_return = float(reward) + self.expected_return_gamma * float(self._expected_return)
         if not self._reward_running_init:
             self._reward_running_avg = reward
             self._reward_running_init = True
@@ -1020,6 +1032,7 @@ class xAppGymPRBAllocator(xAppBase):
             self._tb.add_scalar(f"{scope}/reward", float(reward), self.timestep)
             self._tb.add_scalar(f"{scope}/reward_running_avg", float(self._reward_running_avg), self.timestep)
             self._tb.add_scalar(f"{scope}/return_cumulative", float(self._cumulative_return), self.timestep)
+            self._tb.add_scalar(f"{scope}/expected_return", float(self._expected_return), self.timestep)
             self._tb.add_scalar(f"{scope}/epsilon", float(epsilon), self.timestep)
             if loss is not None:
                 self._tb.add_scalar(f"{scope}/loss", float(loss), self.timestep)
