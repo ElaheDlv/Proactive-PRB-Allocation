@@ -224,10 +224,14 @@ class xAppDQNPRBAllocator(xAppBase):
         if self.save_interval < 0:
             self.save_interval = 0
         self.train_max_steps = max(0, int(getattr(settings, "DQN_PRB_MAX_TRAIN_STEPS", 0)))
+        self.expected_return_gamma = float(getattr(settings, "DQN_EXPECTED_RETURN_GAMMA", 0.95))
+        if not (0.0 <= self.expected_return_gamma < 1.0):
+            self.expected_return_gamma = 0.95
 
         # Internal state
         self._t = 0  # global decision counter (used for ε schedule and logging)
         self._per_cell_prev = {}  # cell_id -> {state, action} for previous decision
+        self._expected_return = defaultdict(float)
         self._last_loss = None    # last training loss (for TB/W&B)
         self._action_counts = defaultdict(int)  # histogram of actions taken
         self.seq_len = max(1, int(getattr(settings, "DQN_PRB_SEQ_LEN", 1)))
@@ -710,10 +714,14 @@ class xAppDQNPRBAllocator(xAppBase):
         return float(self.w_e * e + self.w_u * u + self.w_m * m)
 
     def _act(self, state):
-        """Epsilon‑greedy action selection (random with prob ε; otherwise argmax Q)."""
+        """Epsilon‑greedy action selection (returns action plus Q-stat diagnostics)."""
         eps = self._epsilon() if self.train_mode else 0.0
-        if random.random() < eps or not TORCH_AVAILABLE:
-            return random.randrange(self._n_actions)
+        explore = self.train_mode and (random.random() < eps)
+        q_stats = {"explore": 1.0 if explore else 0.0}
+        greedy_action = random.randrange(self._n_actions)
+        if not TORCH_AVAILABLE or not hasattr(self, "_q") or self._q is None:
+            action = random.randrange(self._n_actions) if explore else greedy_action
+            return action, q_stats
         with torch.no_grad():
             device = self._device if self._device is not None else torch.device("cpu")
             state_arr = np.asarray(state, dtype=np.float32)
@@ -721,7 +729,15 @@ class xAppDQNPRBAllocator(xAppBase):
                 state_arr = state_arr[np.newaxis, :]
             x = torch.from_numpy(state_arr).to(device)
             q, _ = self._split_q_output(self._q(x))
-            return int(torch.argmax(q, dim=1).item())
+            greedy_action = int(torch.argmax(q, dim=1).item())
+            q_cpu = q.detach().to("cpu").numpy().ravel()
+            q_stats.update({
+                "q_max": float(np.max(q_cpu)),
+                "q_min": float(np.min(q_cpu)),
+                "q_mean": float(np.mean(q_cpu)),
+            })
+        action = random.randrange(self._n_actions) if explore else greedy_action
+        return action, q_stats
 
     def _split_q_output(self, out):
         if isinstance(out, (tuple, list)):
@@ -1104,9 +1120,14 @@ class xAppDQNPRBAllocator(xAppBase):
                 prb_e = float(prb_map.get(SL_E, 0))
                 prb_u = float(prb_map.get(SL_U, 0))
                 prb_m = float(prb_map.get(SL_M, 0))
+                q_stats = prev.get("q_stats") or {}
+                prev_return = self._expected_return[cell_id]
+                expected_return = float(r) + self.expected_return_gamma * float(prev_return)
+                self._expected_return[cell_id] = expected_return
                 metrics = {
                     "reward": r,
                     "reward_ema": float(self._reward_ema) if self._reward_ema is not None else float(r),
+                    "expected_return": expected_return,
                     "embb_score": e,
                     "urllc_score": u,
                     "mmtc_score": m,
@@ -1117,6 +1138,10 @@ class xAppDQNPRBAllocator(xAppBase):
                     "prb_URLLC": prb_u,
                     "prb_mMTC": prb_m,
                     "action_prev": int(prev["action"]),
+                    "q_value_max": float(q_stats.get("q_max", 0.0)),
+                    "q_value_mean": float(q_stats.get("q_mean", 0.0)),
+                    "q_value_min": float(q_stats.get("q_min", 0.0)),
+                    "explore_flag": float(q_stats.get("explore", 0.0)),
                 }
                 for sl, label in ((SL_E, "eMBB"), (SL_U, "URLLC"), (SL_M, "mMTC")):
                     slice_metrics = per_slice[sl]
@@ -1134,11 +1159,12 @@ class xAppDQNPRBAllocator(xAppBase):
                     metrics[f"slice/All/{metric_name}"] = value
                 self._log(self._t, cell_id, metrics)
 
-            action = self._act(seq_now)
+            action, q_stats = self._act(seq_now)
             self._apply_action(cell, action)
             self._per_cell_prev[cell_id] = {
                 "seq": np.asarray(seq_now, dtype=np.float32).copy(),
                 "action": action,
+                "q_stats": q_stats,
             }
 
         if self._tb is not None and self._t % 50 == 0:
@@ -1181,6 +1207,7 @@ class xAppDQNPRBAllocator(xAppBase):
             "aux_future_state": self.aux_future_state,
             "aux_weight": self.aux_weight,
             "aux_horizon": self.aux_horizon,
+            "expected_return_gamma": self.expected_return_gamma,
             "config_signature": getattr(self, "_config_signature_str", None),
         })
         return j

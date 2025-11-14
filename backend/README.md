@@ -714,6 +714,39 @@ python backend/main.py \
   --sim-step 0.01 --trace-bin 0.01 --dqn-period 1 --dqn-move-step 5 \
   --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 128 \
   --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
+
+python backend/main.py \
+  --preset simple --mode headless --freeze-mobility \
+  --prb-gym \
+  --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
+  --prb-gym-load-model backend/models/past_runs/mlp_step100000.pt \
+  --prb-gym-eval \
+  --dqn-model-arch mlp \
+  --sim-step 0.01 --trace-bin 0.01 \
+  --dqn-period 1 --dqn-move-step 5 \
+  --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 \
+  --strict-real-traffic
+
+
+  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json --prb-gym-load-model backend/models/past_runs/lstm_seq8_step100000.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
+
+
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json --prb-gym-load-model backend/models/past_runs/mlp_step100000.pt --prb-gym-eval --dqn-model-arch mlp --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
+
+
+
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/lstm_seq4/dqn_prb_lstm_seq4_20251113_181132_step702240.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8773 --dash-port 8063
+
+17600000
+
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/lstm_seq16/dqn_prb_lstm_seq16_20251113_181137_step702240.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 16 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8774 --dash-port 8064
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/mlp/dqn_prb_mlp_20251113_181139_step702240.pt --prb-gym-eval --dqn-model-arch mlp --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8775 --dash-port 8065
+
+
 ```
 
 The evaluation flag sets `PRB_GYM_TRAIN=0`, so the xApp replays the configured episodes, emits KPI/reward scalars to TensorBoard (tagged as `eval/...`), and restores weights from the file supplied via `--prb-gym-load-model` (or `PRB_GYM_LOAD_MODEL_PATH`).
