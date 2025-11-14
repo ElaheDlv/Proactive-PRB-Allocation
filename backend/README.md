@@ -702,7 +702,18 @@ python backend/main.py \
   --dqn-epsilon-start 0.5 --dqn-epsilon-end 0.05 --prb-gym-eps-decay 5000000 \
   --dqn-log-tb --steps 5500000 --dqn-save-interval 10000 \
   --strict-real-traffic --ws-port 8782 --dash-port 8072
-  
+
+
+
+  python -m backend.tools.convert_training_configs_to_gym_catalog --input backend/notebooks/xapp_dqn_training_configs_Trace_20s_1_all_traces.json --trace-root backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned --output backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_13579_all_traces.json --sim-step 0.01 --decision-period 5 --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
+
+
+
+
+python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_13579_all_traces.json --dqn-train --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-lr 5e-4 --dqn-target-update 500 --dqn-epsilon-start 0.5 --dqn-epsilon-end 0.05 --prb-gym-eps-decay 704000 --dqn-log-tb --steps 1408000000 --dqn-save-interval 10000 --strict-real-traffic --ws-port 8764 --dash-port 8054
+
+
+
 ##############################################################
     python backend/main.py --preset simple --mode server \
     --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \

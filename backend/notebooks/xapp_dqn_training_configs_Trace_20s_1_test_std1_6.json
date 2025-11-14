@@ -1,0 +1,178 @@
+[
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 5,
+    "urllc_default_prb": 5,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 5,
+    "urllc_default_prb": 7,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 5,
+    "urllc_default_prb": 9,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 5,
+    "urllc_default_prb": 11,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 7,
+    "urllc_default_prb": 5,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 7,
+    "urllc_default_prb": 7,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 7,
+    "urllc_default_prb": 9,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 7,
+    "urllc_default_prb": 11,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 9,
+    "urllc_default_prb": 5,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 9,
+    "urllc_default_prb": 7,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 9,
+    "urllc_default_prb": 9,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 9,
+    "urllc_default_prb": 11,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 11,
+    "urllc_default_prb": 5,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 11,
+    "urllc_default_prb": 7,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 11,
+    "urllc_default_prb": 9,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  },
+  {
+    "num_ues_per_slice": 1,
+    "embb_default_prb": 11,
+    "urllc_default_prb": 11,
+    "trace_type": "std1",
+    "trace_value": 6.0,
+    "trace_files": {
+      "embb": "eMBB_M2_std1_6_aligned_trace_sec.csv",
+      "urllc": "URLLC_M1_std1_6_aligned_trace_sec.csv"
+    }
+  }
+]
