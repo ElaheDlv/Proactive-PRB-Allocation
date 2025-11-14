@@ -703,6 +703,21 @@ python backend/main.py \
   --dqn-log-tb --steps 5500000 --dqn-save-interval 10000 \
   --strict-real-traffic --ws-port 8782 --dash-port 8072
 
+To *evaluate* a previously trained Gym checkpoint (no replay buffer or optimizer updates, but the same TensorBoard metrics under an `eval/` namespace), pass both the checkpoint path and the evaluation switch:
+
+```bash
+python backend/main.py \
+  --preset simple --mode headless --freeze-mobility \
+  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
+  --prb-gym-load-model backend/models/past_runs/lstm_seq8_step100000.pt \
+  --prb-gym-eval \
+  --sim-step 0.01 --trace-bin 0.01 --dqn-period 1 --dqn-move-step 5 \
+  --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 128 \
+  --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
+```
+
+The evaluation flag sets `PRB_GYM_TRAIN=0`, so the xApp replays the configured episodes, emits KPI/reward scalars to TensorBoard (tagged as `eval/...`), and restores weights from the file supplied via `--prb-gym-load-model` (or `PRB_GYM_LOAD_MODEL_PATH`).
+
 
 
   python -m backend.tools.convert_training_configs_to_gym_catalog --input backend/notebooks/xapp_dqn_training_configs_Trace_20s_1_all_traces.json --trace-root backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned --output backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_13579_all_traces.json --sim-step 0.01 --decision-period 5 --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1

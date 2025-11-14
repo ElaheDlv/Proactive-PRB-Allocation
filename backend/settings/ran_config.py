@@ -268,6 +268,9 @@ PRB_GYM_ENABLE = os.getenv("PRB_GYM_ENABLE", "0") in ("1", "true", "True")
 PRB_GYM_CONFIG_PATH = os.getenv("PRB_GYM_CONFIG_PATH", "")
 PRB_GYM_LOOP = os.getenv("PRB_GYM_LOOP", "0") in ("1", "true", "True")
 PRB_GYM_SHUFFLE_EPISODES = os.getenv("PRB_GYM_SHUFFLE_EPISODES", "0") in ("1", "true", "True")
+PRB_GYM_TRAIN = os.getenv("PRB_GYM_TRAIN", "1") in ("1", "true", "True")
+PRB_GYM_EVAL_ONLY = os.getenv("PRB_GYM_EVAL_ONLY", "0") in ("1", "true", "True")
+PRB_GYM_LOAD_MODEL_PATH = os.getenv("PRB_GYM_LOAD_MODEL_PATH", "")
 try:
     _gym_decay_raw = os.getenv("PRB_GYM_EPS_DECAY_STEPS")
     if _gym_decay_raw is None:

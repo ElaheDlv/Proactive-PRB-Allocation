@@ -779,6 +779,10 @@ class xAppGymPRBAllocator(xAppBase):
             print(f"{self.xapp_id}: no episodes configured; disable via --prb-gym-config.")
             self.enabled = False
             return
+        self.eval_only = bool(getattr(settings, "PRB_GYM_EVAL_ONLY", False))
+        train_flag = bool(getattr(settings, "PRB_GYM_TRAIN", True))
+        self.train_enabled = train_flag and not self.eval_only
+        self._load_model_path = (getattr(settings, "PRB_GYM_LOAD_MODEL_PATH", "") or "").strip()
         self.state_dim = self.env._state_dim
         self.n_actions = len(self.env._action_combos)
         self.gamma = float(getattr(settings, "DQN_PRB_GAMMA", 0.99))
@@ -805,9 +809,15 @@ class xAppGymPRBAllocator(xAppBase):
             base_ext = ".pt"
         base_dir = os.path.dirname(base_root) or "."
         base_name = os.path.basename(base_root) or "dqn_prb"
-        model_dir = os.path.join(base_dir, self._config_signature)
-        os.makedirs(model_dir, exist_ok=True)
-        self.model_path = os.path.join(model_dir, f"{base_name}_{self.run_tag}_{self._run_stamp}{base_ext}")
+        if self.train_enabled:
+            model_dir = os.path.join(base_dir, self._config_signature)
+            os.makedirs(model_dir, exist_ok=True)
+            self.model_path = os.path.join(model_dir, f"{base_name}_{self.run_tag}_{self._run_stamp}{base_ext}")
+        else:
+            target_path = self._load_model_path or self._base_model_path
+            if target_path and not os.path.splitext(target_path)[1]:
+                target_path = f"{target_path}{base_ext}"
+            self.model_path = target_path or os.path.join(base_dir, f"{base_name}{base_ext}")
 
         self.device = self._select_device()
         self.q, self.q_target = self._build_models()
@@ -823,7 +833,9 @@ class xAppGymPRBAllocator(xAppBase):
         self._action_counts = defaultdict(int)
         self._tb = None
         self._tb_interval = max(1, int(getattr(settings, "DQN_PRB_LOG_INTERVAL", 1)))
+        self._tb_scope = "eval" if not self.train_enabled else "train"
         self._setup_tensorboard()
+        self._maybe_restore_weights()
         self._state_window: deque = deque(maxlen=self.seq_len)
         self._episode_step_count = 0
         self._eps_decay_steps = max(1, int(getattr(settings, "PRB_GYM_EPS_DECAY_STEPS", 2000)))
@@ -866,7 +878,8 @@ class xAppGymPRBAllocator(xAppBase):
         if self.train_max_steps > 0 and self.timestep >= self.train_max_steps:
             self.enabled = False
             print(f"{self.xapp_id}: reached max train steps; shutting down.")
-            self._maybe_save_checkpoint(force=True)
+            if self.train_enabled:
+                self._maybe_save_checkpoint(force=True)
             return
 
         self.timestep += 1
@@ -884,12 +897,15 @@ class xAppGymPRBAllocator(xAppBase):
             alpha = self._reward_running_alpha
             self._reward_running_avg += alpha * (reward - self._reward_running_avg)
         next_state = self._encode_state(next_state_raw, reset=False)
-        self.replay.push(self.last_state, action, reward, next_state, float(done))
-        loss = self._optimize()
-        if loss is not None:
-            self._last_loss = loss
+        loss = None
+        if self.train_enabled:
+            self.replay.push(self.last_state, action, reward, next_state, float(done))
+            loss = self._optimize()
+            if loss is not None:
+                self._last_loss = loss
         if self._tb is not None and (self.timestep % self._tb_interval) == 0:
-            self._log_tb(reward, self._epsilon(), self._last_loss, slice_metrics)
+            loss_to_log = self._last_loss if self.train_enabled else None
+            self._log_tb(reward, self._epsilon(), loss_to_log, slice_metrics)
         if done:
             self._episode_counter += 1
             self._log_episode_return()
@@ -897,7 +913,8 @@ class xAppGymPRBAllocator(xAppBase):
             reset_obs = self.env.reset()
             if reset_obs is None:
                 print(f"{self.xapp_id}: episode catalog finished; stopping training.")
-                self._maybe_save_checkpoint(force=True)
+                if self.train_enabled:
+                    self._maybe_save_checkpoint(force=True)
                 self.enabled = False
                 return
             self.last_state = self._encode_state(reset_obs, reset=True)
@@ -927,6 +944,8 @@ class xAppGymPRBAllocator(xAppBase):
 
     def _optimize(self):
         """One SGD step on a sampled replay mini-batch."""
+        if not self.train_enabled:
+            return None
         if len(self.replay) < max(32, self.batch):
             return None
         states, actions, rewards, next_states, dones = self.replay.sample(self.batch)
@@ -996,34 +1015,35 @@ class xAppGymPRBAllocator(xAppBase):
         """Write scalar metrics / histograms to TensorBoard."""
         if self._tb is None:
             return
+        scope = self._tb_scope
         try:
-            self._tb.add_scalar("train/reward", float(reward), self.timestep)
-            self._tb.add_scalar("train/reward_running_avg", float(self._reward_running_avg), self.timestep)
-            self._tb.add_scalar("train/return_cumulative", float(self._cumulative_return), self.timestep)
-            self._tb.add_scalar("train/epsilon", float(epsilon), self.timestep)
+            self._tb.add_scalar(f"{scope}/reward", float(reward), self.timestep)
+            self._tb.add_scalar(f"{scope}/reward_running_avg", float(self._reward_running_avg), self.timestep)
+            self._tb.add_scalar(f"{scope}/return_cumulative", float(self._cumulative_return), self.timestep)
+            self._tb.add_scalar(f"{scope}/epsilon", float(epsilon), self.timestep)
             if loss is not None:
-                self._tb.add_scalar("train/loss", float(loss), self.timestep)
+                self._tb.add_scalar(f"{scope}/loss", float(loss), self.timestep)
             for sl, metrics in slice_metrics.items():
                 label = "eMBB" if sl == SL_E else "URLLC"
-                self._tb.add_scalar(f"train/{label}/score", float(metrics["score"]), self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/score", float(metrics["score"]), self.timestep)
                 # if "bonus" in metrics:
                 #     self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
                 if "prb_penalty" in metrics:
-                    self._tb.add_scalar(f"train/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
+                    self._tb.add_scalar(f"{scope}/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
                 prb_norm = float(metrics.get("prb_usage_norm", 0.0))
                 prb_abs = float(metrics.get("prb_usage_prb", 0.0))
-                self._tb.add_scalar(f"train/{label}/prb_usage_norm", prb_norm, self.timestep)
-                self._tb.add_scalar(f"train/{label}/prb_usage_prb", prb_abs, self.timestep)
-                self._tb.add_scalar(f"train/{label}/latency", float(metrics["latency"]), self.timestep)
-                self._tb.add_scalar(f"train/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
-                self._tb.add_scalar(f"train/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/prb_usage_norm", prb_norm, self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/prb_usage_prb", prb_abs, self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/latency", float(metrics["latency"]), self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/buffer_bytes", float(metrics["buf_bytes"]), self.timestep)
+                self._tb.add_scalar(f"{scope}/{label}/tx_mbps", float(metrics["tx_mbps"]), self.timestep)
                 if "satisfaction" in metrics:
-                    self._tb.add_scalar(f"train/{label}/satisfaction", float(metrics["satisfaction"]), self.timestep)
+                    self._tb.add_scalar(f"{scope}/{label}/satisfaction", float(metrics["satisfaction"]), self.timestep)
                 if "prb_grant_ratio" in metrics:
-                    self._tb.add_scalar(f"train/{label}/prb_grant_ratio", float(metrics["prb_grant_ratio"]), self.timestep)
+                    self._tb.add_scalar(f"{scope}/{label}/prb_grant_ratio", float(metrics["prb_grant_ratio"]), self.timestep)
             if self.timestep % (self._tb_interval * 10) == 0:
                 counts = [self._action_counts.get(i, 0) for i in range(self.n_actions)]
-                self._tb.add_histogram("actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
+                self._tb.add_histogram(f"{scope}/actions", torch.tensor(counts, dtype=torch.float32), self.timestep)
         except Exception:
             pass
 
@@ -1032,7 +1052,7 @@ class xAppGymPRBAllocator(xAppBase):
         if self._tb is None:
             return
         try:
-            self._tb.add_scalar("train/episode_return", float(self._episode_return), self._episode_counter)
+            self._tb.add_scalar(f"{self._tb_scope}/episode_return", float(self._episode_return), self._episode_counter)
         except Exception:
             pass
 
@@ -1065,6 +1085,8 @@ class xAppGymPRBAllocator(xAppBase):
         """Save checkpoints periodically or when forced (e.g. shutdown)."""
         if not TORCH_AVAILABLE or getattr(self, "q", None) is None:
             return
+        if not self.train_enabled:
+            return
         if force:
             final_path = self._checkpoint_path(None)
             self._save_model(final_path)
@@ -1084,10 +1106,43 @@ class xAppGymPRBAllocator(xAppBase):
         self._save_model(step_path)
         self._last_save_step = self.timestep
 
+    def _maybe_restore_weights(self) -> bool:
+        """Load checkpoint weights when a file path is supplied."""
+        if not TORCH_AVAILABLE or getattr(self, "q", None) is None:
+            return False
+        candidates = []
+        if self._load_model_path:
+            candidates.append(self._load_model_path)
+        if not candidates and self.eval_only:
+            candidates.append(self.model_path)
+        loaded = False
+        for raw_path in candidates:
+            path = (raw_path or "").strip()
+            if not path:
+                continue
+            path = os.path.expanduser(path)
+            if not os.path.isfile(path):
+                continue
+            try:
+                state = torch.load(path, map_location=self.device)
+                self.q.load_state_dict(state)
+                self.q_target.load_state_dict(state)
+                print(f"{self.xapp_id}: restored weights from {path}")
+                loaded = True
+                break
+            except Exception as exc:
+                print(f"{self.xapp_id}: failed to load checkpoint {path}: {exc}")
+                return False
+        if self.eval_only and not loaded:
+            checked = ", ".join(candidates) if candidates else "None"
+            print(f"{self.xapp_id}: evaluation mode enabled but no checkpoint found (checked: {checked}).")
+        return loaded
+
     def __del__(self):
         """Best-effort cleanup for the TB writer."""
         try:
-            self._maybe_save_checkpoint(force=True)
+            if self.train_enabled:
+                self._maybe_save_checkpoint(force=True)
             if self._tb is not None:
                 self._tb.flush()
                 self._tb.close()

@@ -171,6 +171,16 @@ parser.add_argument(
     type=int,
     help="Global epsilon decay steps for the Gym-style PRB allocator (total decisions)",
 )
+parser.add_argument(
+    "--prb-gym-load-model",
+    type=str,
+    help="Path to a checkpoint to load before running the Gym-style PRB allocator",
+)
+parser.add_argument(
+    "--prb-gym-eval",
+    action="store_true",
+    help="Run the Gym-style PRB allocator in evaluation mode (skip replay/optimizer updates)",
+)
 parser.add_argument("--prb-const", action="store_true", help="Enable constant-PRB allocator xApp")
 parser.add_argument("--prb-const-embb", type=int, help="Constant PRBs to reserve for the eMBB slice")
 parser.add_argument("--prb-const-urllc", type=int, help="Constant PRBs to reserve for the URLLC slice")
@@ -400,6 +410,11 @@ if args.prb_gym_eps_decay is not None:
         os.environ["PRB_GYM_EPS_DECAY_STEPS"] = str(_pg_decay)
         # Legacy name for older configs
         os.environ["PRB_GYM_EPS_DECAY_PER_EPISODE"] = str(_pg_decay)
+if args.prb_gym_load_model:
+    os.environ["PRB_GYM_LOAD_MODEL_PATH"] = args.prb_gym_load_model
+if args.prb_gym_eval:
+    os.environ["PRB_GYM_EVAL_ONLY"] = "1"
+    os.environ["PRB_GYM_TRAIN"] = "0"
 if args.prb_const:
     os.environ["PRB_CONST_ALLOC_ENABLE"] = "1"
 if args.prb_const_embb is not None:
