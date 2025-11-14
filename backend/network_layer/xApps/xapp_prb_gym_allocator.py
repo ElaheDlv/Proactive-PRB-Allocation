@@ -12,7 +12,7 @@ import os
 import random
 from collections import deque, defaultdict
 from itertools import product
-from typing import Dict, List, Optional, Tuple
+from typing import DefaultDict, Dict, List, Optional, Tuple
 from datetime import datetime
 
 import numpy as np
@@ -129,6 +129,17 @@ class PRBGymEnv:
         self._prb_penalty = self._init_prb_penalty()
         self._latency_sigmoid = self._init_latency_sigmoid()
         self._latency_tail = self._init_latency_tail()
+        # Served-throughput shaping helps distinguish easy/low-load episodes from heavy ones.
+        self._throughput_ref_mbps = max(1e-6, float(getattr(settings, "PRB_GYM_THROUGHPUT_REF_MBPS", self.norm_dl_mbps)))
+        decay = float(getattr(settings, "PRB_GYM_THROUGHPUT_PEAK_DECAY", 0.97))
+        self._throughput_peak_decay = max(0.0, min(1.0, decay))
+        base_bonus = float(getattr(settings, "PRB_GYM_THROUGHPUT_BONUS_WEIGHT", 0.15))
+        per_slice_bonus = getattr(settings, "PRB_GYM_THROUGHPUT_BONUS_PER_SLICE", {}) or {}
+        self._throughput_bonus = {
+            SL_E: max(0.0, float(per_slice_bonus.get(SL_E, per_slice_bonus.get("eMBB", base_bonus)))),
+            SL_U: max(0.0, float(per_slice_bonus.get(SL_U, per_slice_bonus.get("URLLC", base_bonus)))),
+        }
+        self._throughput_norm_tracker: DefaultDict[str, float] = defaultdict(lambda: self._throughput_ref_mbps)
 
         self._episodes = self._load_episode_specs()
         self._shuffle_catalog = bool(getattr(settings, "PRB_GYM_SHUFFLE_EPISODES", False))
@@ -442,6 +453,7 @@ class PRBGymEnv:
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
             demand_prb = max(0.0, float(data.get("prb_req", 0.0) or 0.0))
             granted_prb = max(0.0, float(data.get("prb_granted", 0.0) or 0.0))
+            thr_bonus = self._slice_throughput_bonus(tx_mbps, sl)
             if demand_prb <= 0.0:
                 denom = max(1.0, slice_prb)
             else:
@@ -450,6 +462,7 @@ class PRBGymEnv:
             scores[sl] = {
                 "score": score,
                 "bonus": bonus,
+                "throughput_bonus": thr_bonus,
                 "prb_penalty": prb_pen,
                 "prb_usage_norm": slice_prb / max_prb,
                 "prb_usage_prb": slice_prb,
@@ -460,9 +473,10 @@ class PRBGymEnv:
                 "prb_grant_ratio": grant_ratio,
                 "prb_req": demand_prb,
                 "prb_granted": granted_prb,
+                "throughput_norm_mbps": self._throughput_norm_tracker[sl],
             }
             weighted += weights[sl] * score
-            bonus_total += bonus
+            bonus_total += bonus + thr_bonus
         total_reward = max(0, min(1.0, weighted + bonus_total))
         #total_reward = max(0, min(1.0, weighted))
         return total_reward, scores
@@ -625,11 +639,27 @@ class PRBGymEnv:
         if coeff <= 0.0:
             return 0.0
         usage = max(0.0, slice_prb) / max(1e-6, max_prb)
-    
+
         # Apply penalty only when latency is already good (score > 0.5)
         good_perf = 1 / (1 + math.exp(-8 * (score - 0.5)))  # ~0 when score<0.5, ~1 when >0.7
         penalty = coeff * usage * good_perf
         return penalty
+
+    def _slice_throughput_bonus(self, tx_mbps: float, slice_name: str) -> float:
+        """Reward term that scales with served throughput relative to recent peaks."""
+        coeff = max(0.0, self._throughput_bonus.get(slice_name, 0.0))
+        if coeff <= 0.0:
+            return 0.0
+        tx = max(0.0, float(tx_mbps))
+        # Track a decaying peak so each slice is compared against its recent load envelope.
+        peak = self._throughput_norm_tracker[slice_name]
+        peak = max(tx, peak * self._throughput_peak_decay)
+        peak = max(peak, self._throughput_ref_mbps)
+        self._throughput_norm_tracker[slice_name] = peak
+        if peak <= 0:
+            return 0.0
+        load_ratio = self._clamp01(tx / peak)
+        return coeff * load_ratio
 
 
     def _reset_progress_bar(self):
