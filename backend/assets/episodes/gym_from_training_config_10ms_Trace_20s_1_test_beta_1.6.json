@@ -1,0 +1,372 @@
+{
+  "episodes": [
+    {
+      "id": "cfg_00000",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00001",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 7
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00002",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 9
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00003",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 5,
+        "URLLC": 11
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00004",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 7,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00005",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 7,
+        "URLLC": 7
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00006",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 7,
+        "URLLC": 9
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00007",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 7,
+        "URLLC": 11
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00008",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 9,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00009",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 9,
+        "URLLC": 7
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00010",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 9,
+        "URLLC": 9
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00011",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 9,
+        "URLLC": 11
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00012",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 11,
+        "URLLC": 5
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00013",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 11,
+        "URLLC": 7
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00014",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 11,
+        "URLLC": 9
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    },
+    {
+      "id": "cfg_00015",
+      "duration_steps": 399,
+      "freeze_mobility": true,
+      "initial_prb": {
+        "eMBB": 11,
+        "URLLC": 11
+      },
+      "slices": {
+        "eMBB": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/eMBB_M2_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.2"
+        },
+        "URLLC": {
+          "ue_count": 1,
+          "trace": "backend/notebooks/Unified_CMTC_test/beta/beta_1.6/URLLC_M1_beta_1.6_aligned_trace_sec.csv",
+          "trace_speedup": 1.0,
+          "ue_ip": "10.0.0.1"
+        }
+      }
+    }
+  ]
+}
