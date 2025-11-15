@@ -132,29 +132,8 @@ RAN_MCS_SPECTRAL_EFFICIENCY_TABLE = {
 
 
 # ---------------------------
-# DQN PRB Allocator (xApp) settings
+# DQN/Gym allocator settings
 # ---------------------------
-# Enable/disable DQN xApp
-DQN_PRB_ENABLE = os.getenv("DQN_PRB_ENABLE", "0") in ("1", "true", "True")
-# Enable/disable simplified DQN xApp variant
-DQN_PRB_SIMPLE_ENABLE = os.getenv("DQN_PRB_SIMPLE_ENABLE", "0") in ("1", "true", "True")
-# Enable/disable SB3-backed DQN xApp
-SB3_DQN_PRB_ENABLE = os.getenv("SB3_DQN_PRB_ENABLE", "0") in ("1", "true", "True")
-# SB3-specific knobs reuse many DQN defaults but expose their own env vars
-try:
-    SB3_DQN_TOTAL_STEPS = int(os.getenv("SB3_DQN_TOTAL_STEPS", "100000"))
-except Exception:
-    SB3_DQN_TOTAL_STEPS = 100000
-try:
-    SB3_DQN_TARGET_UPDATE = int(os.getenv("SB3_DQN_TARGET_UPDATE", "1000"))
-except Exception:
-    SB3_DQN_TARGET_UPDATE = 1000
-try:
-    SB3_DQN_SAVE_INTERVAL = int(os.getenv("SB3_DQN_SAVE_INTERVAL", "5000"))
-except Exception:
-    SB3_DQN_SAVE_INTERVAL = 5000
-# Train online (epsilon-greedy + replay) vs. inference-only
-DQN_PRB_TRAIN = os.getenv("DQN_PRB_TRAIN", "1") in ("1", "true", "True")
 # Steps between actions (period in sim steps)
 try:
     DQN_PRB_DECISION_PERIOD_STEPS = int(os.getenv("DQN_PRB_DECISION_PERIOD_STEPS", "1"))
@@ -192,22 +171,6 @@ try:
     DQN_PRB_SEQ_HIDDEN = int(os.getenv("DQN_PRB_SEQ_HIDDEN", "128"))
 except Exception:
     DQN_PRB_SEQ_HIDDEN = 128
-DQN_PRB_USE_DECISION_HORIZON = os.getenv("DQN_PRB_USE_DECISION_HORIZON", "0") in ("1", "true", "True")
-DQN_PRB_HORIZON_REDUCE = os.getenv("DQN_PRB_HORIZON_REDUCE", "mean").strip().lower()
-if DQN_PRB_HORIZON_REDUCE not in {"mean", "last", "sum"}:
-    DQN_PRB_HORIZON_REDUCE = "mean"
-
-DQN_PRB_DEBUG_STATE = os.getenv("DQN_PRB_DEBUG_STATE", "0") in ("1", "true", "True")
-try:
-    DQN_PRB_DEBUG_INTERVAL = max(1, int(os.getenv("DQN_PRB_DEBUG_INTERVAL", "1")))
-except Exception:
-    DQN_PRB_DEBUG_INTERVAL = 1
-
-try:
-    DQN_PRB_EPISODE_LEN = int(os.getenv("DQN_PRB_EPISODE_LEN", "0"))
-except Exception:
-    DQN_PRB_EPISODE_LEN = 0
-DQN_PRB_EPISODE_MARK_DONE = os.getenv("DQN_PRB_EPISODE_MARK_DONE", "1") not in ("0", "false", "False")
 
 try:
     DQN_PRB_SAVE_INTERVAL = int(os.getenv("DQN_PRB_SAVE_INTERVAL", "0"))
@@ -221,15 +184,6 @@ try:
 except Exception:
     DQN_PRB_LOG_INTERVAL = 1
 
-DQN_PRB_AUX_FUTURE_STATE = os.getenv("DQN_PRB_AUX_FUTURE_STATE", "0") in ("1", "true", "True")
-try:
-    DQN_PRB_AUX_WEIGHT = float(os.getenv("DQN_PRB_AUX_WEIGHT", "0.1"))
-except Exception:
-    DQN_PRB_AUX_WEIGHT = 0.1
-try:
-    DQN_PRB_AUX_HORIZON = int(os.getenv("DQN_PRB_AUX_HORIZON", "1"))
-except Exception:
-    DQN_PRB_AUX_HORIZON = 1
 try:
     DQN_PRB_MAX_TRAIN_STEPS = int(os.getenv("DQN_PRB_MAX_TRAIN_STEPS", "0"))
 except Exception:
@@ -237,19 +191,14 @@ except Exception:
 
 # Reward shaping weights and parameters
 try:
-    DQN_WEIGHT_EMBB = float(os.getenv("DQN_WEIGHT_EMBB", "0.33"))
-    DQN_WEIGHT_URLLC = float(os.getenv("DQN_WEIGHT_URLLC", "0.34"))
-    DQN_WEIGHT_MMTC = float(os.getenv("DQN_WEIGHT_MMTC", "0.33"))
+    DQN_WEIGHT_EMBB = float(os.getenv("DQN_WEIGHT_EMBB", "0.5"))
+    DQN_WEIGHT_URLLC = float(os.getenv("DQN_WEIGHT_URLLC", "0.5"))
     DQN_URLLC_GAMMA_S = float(os.getenv("DQN_URLLC_GAMMA_S", "0.01"))  # 10 ms
     DQN_NEED_SATURATION = float(os.getenv("DQN_NEED_SATURATION", "1.5"))
-    # eMBB score scaling per paper: score = alpha * (beta + tx_bits - buf_bits), then clipped to [0,1]
-    DQN_EMBB_ALPHA = float(os.getenv("DQN_EMBB_ALPHA", "1.0"))
-    DQN_EMBB_BETA = float(os.getenv("DQN_EMBB_BETA", "0.0"))
 except Exception:
-    DQN_WEIGHT_EMBB, DQN_WEIGHT_URLLC, DQN_WEIGHT_MMTC = 0.33, 0.34, 0.33
+    DQN_WEIGHT_EMBB, DQN_WEIGHT_URLLC = 0.5, 0.5
     DQN_URLLC_GAMMA_S = 0.01
     DQN_NEED_SATURATION = 1.5
-    DQN_EMBB_ALPHA, DQN_EMBB_BETA = 1.0, 0.0
 
 # Model path
 DQN_PRB_MODEL_PATH = os.getenv("DQN_PRB_MODEL_PATH", "backend/models/dqn_prb.pt")
@@ -257,13 +206,6 @@ DQN_PRB_MODEL_PATH = os.getenv("DQN_PRB_MODEL_PATH", "backend/models/dqn_prb.pt"
 # DQN logging/telemetry
 DQN_TB_ENABLE = os.getenv("DQN_TB_ENABLE", "0") in ("1", "true", "True")
 DQN_TB_DIR = os.getenv("DQN_TB_DIR", "backend/tb_logs")
-DQN_WANDB_ENABLE = os.getenv("DQN_WANDB_ENABLE", "0") in ("1", "true", "True")
-DQN_WANDB_PROJECT = os.getenv("DQN_WANDB_PROJECT", "ai-ran-dqn")
-DQN_WANDB_RUNNAME = os.getenv("DQN_WANDB_RUNNAME", "")
-DQN_PRB_EPISODIC_ENABLE = os.getenv("DQN_PRB_EPISODIC_ENABLE", "0") in ("1", "true", "True")
-DQN_EPISODE_LOOP = os.getenv("DQN_EPISODE_LOOP", "0") in ("1", "true", "True")
-DQN_EPISODE_CONFIG_PATH = os.getenv("DQN_EPISODE_CONFIG_PATH", "")
-DQN_EPISODE_CONFIG_JSON = os.getenv("DQN_EPISODE_CONFIG_JSON", "")
 PRB_GYM_ENABLE = os.getenv("PRB_GYM_ENABLE", "0") in ("1", "true", "True")
 PRB_GYM_CONFIG_PATH = os.getenv("PRB_GYM_CONFIG_PATH", "")
 PRB_GYM_LOOP = os.getenv("PRB_GYM_LOOP", "0") in ("1", "true", "True")

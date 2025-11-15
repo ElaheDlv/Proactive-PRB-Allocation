@@ -464,66 +464,9 @@ class PRBGymEnv:
             weighted += weights[sl] * score
             bonus_total += bonus
         total_reward = max(0, min(1.0, weighted + bonus_total))
-        #total_reward = max(0, min(1.0, weighted))
         return total_reward, scores
     
-    # def _reward(self, cell):
-    #     """Latency-only reward with linear decay and full metric logging."""
-    #     agg = self._aggregate_slice_metrics(cell)
-    #     scores = {}
-    #     total_reward = 0.0
-    #     weights = {SL_E: self.w_e, SL_U: self.w_u}
 
-    #     for sl in (SL_E, SL_U):
-    #         data = agg[sl]
-    #         latency_avg = (
-    #             data["latency_sum"] / data["latency_count"]
-    #             if data["latency_count"] > 0 else 0.0
-    #         )
-    #         slice_prb = float(data.get("slice_prb", 0.0) or 0.0)
-    #         buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
-    #         tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
-    #         demand_prb = float(data.get("prb_req", 0.0) or 0.0)
-    #         granted_prb = float(data.get("prb_granted", 0.0) or 0.0)
-
-    #         # --- Linear latency-based reward ---
-    #         lat_target = self._latency_targets[sl]
-    #         alpha = 3.0  # full penalty if latency = 3×target
-    #         if latency_avg <= lat_target:
-    #             slice_reward = 1.0
-    #         elif latency_avg >= alpha * lat_target:
-    #             slice_reward = 0.0
-    #         else:
-    #             slice_reward = 1.0 - (latency_avg - lat_target) / (
-    #                 (alpha - 1) * lat_target
-    #             )
-
-    #         # --- Other metrics (for logging only) ---
-    #         max_prb = max(1.0, float(getattr(cell, "max_dl_prb", 1)))
-    #         usage_norm = slice_prb / max_prb
-    #         prb_grant_ratio = (
-    #             granted_prb / max(1.0, demand_prb) if demand_prb > 0 else 1.0
-    #         )
-
-    #         scores[sl] = {
-    #             "score": slice_reward,
-    #             "latency": latency_avg,
-    #             "target": lat_target,
-    #             "prb_usage_norm": usage_norm,
-    #             "prb_usage_prb": slice_prb,
-    #             "prb_req": demand_prb,
-    #             "prb_granted": granted_prb,
-    #             "prb_grant_ratio": prb_grant_ratio,
-    #             "satisfaction": prb_grant_ratio,
-    #             "buf_bytes": buf_bytes,
-    #             "tx_mbps": tx_mbps,
-    #             "prb_penalty": 0.0,
-    #         }
-
-    #         total_reward += weights[sl] * slice_reward
-
-    #     total_reward = np.clip(total_reward, 0.0, 1.0)
-    #     return total_reward, scores
 
 
     def _init_latency_targets(self) -> Dict[str, float]:

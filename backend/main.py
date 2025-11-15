@@ -51,14 +51,7 @@ parser.add_argument(
     help="Directory to write KPI CSV logs",
 )
 
-# DQN PRB allocator controls
-parser.add_argument("--dqn-prb", action="store_true", help="Enable DQN PRB allocator xApp")
-parser.add_argument(
-    "--dqn-prb-simple",
-    action="store_true",
-    help="Enable simplified DQN PRB allocator xApp",
-)
-parser.add_argument("--dqn-train", action="store_true", help="Train online (epsilon-greedy)")
+# DQN/Gym allocator hyperparameters
 parser.add_argument("--dqn-model", type=str, help="Path to load/save DQN model")
 parser.add_argument("--dqn-epsilon-start", type=float, help="Epsilon start for exploration")
 parser.add_argument("--dqn-epsilon-end", type=float, help="Epsilon end for exploration")
@@ -76,16 +69,6 @@ parser.add_argument(
 parser.add_argument("--dqn-seq-len", type=int, help="Sequence length for sequential DQN architectures")
 parser.add_argument("--dqn-seq-hidden", type=int, help="Hidden size for sequential DQN architectures")
 parser.add_argument(
-    "--dqn-use-horizon",
-    action="store_true",
-    help="Aggregate states/rewards across the decision period before each DQN action",
-)
-parser.add_argument(
-    "--dqn-horizon-reduce",
-    choices=["mean", "last", "sum"],
-    help="Reduction applied to horizon window for MLP agent inputs (default mean)",
-)
-parser.add_argument(
     "--dqn-save-interval",
     type=int,
     help="Checkpoint interval (steps) for custom DQN; 0 disables periodic saves",
@@ -98,22 +81,7 @@ parser.add_argument(
 parser.add_argument(
     "--dqn-log-interval",
     type=int,
-    help="Interval (steps) for logging scalars to TensorBoard/W&B (default 1)",
-)
-parser.add_argument(
-    "--dqn-aux-future-state",
-    action="store_true",
-    help="Enable auxiliary head to predict future state (dual-head training)",
-)
-parser.add_argument(
-    "--dqn-aux-weight",
-    type=float,
-    help="Loss weight for auxiliary future-state prediction (default 0.1)",
-)
-parser.add_argument(
-    "--dqn-aux-horizon",
-    type=int,
-    help="Number of lookahead steps for the auxiliary future-state head (default 1)",
+    help="Interval (steps) for logging scalars to TensorBoard (default 1)",
 )
 parser.add_argument(
     "--dqn-max-train-steps",
@@ -122,45 +90,6 @@ parser.add_argument(
 )
 parser.add_argument("--dqn-log-tb", action="store_true", help="Enable TensorBoard logging for DQN")
 parser.add_argument("--dqn-tb-dir", type=str, help="TensorBoard log dir for DQN")
-parser.add_argument("--dqn-wandb", action="store_true", help="Enable Weights & Biases logging for DQN")
-parser.add_argument("--dqn-wandb-project", type=str, help="W&B project name")
-parser.add_argument("--dqn-wandb-name", type=str, help="W&B run name")
-parser.add_argument(
-    "--dqn-prb-episodic",
-    action="store_true",
-    help="Enable episodic variant of the DQN PRB allocator",
-)
-parser.add_argument(
-    "--dqn-episode-config",
-    type=str,
-    help="Path to a JSON file describing episodic UE/trace configurations",
-)
-parser.add_argument(
-    "--dqn-episode-config-json",
-    type=str,
-    help="Inline JSON blob describing episodic configurations (alternative to --dqn-episode-config)",
-)
-parser.add_argument(
-    "--dqn-episode-loop",
-    action="store_true",
-    help="Loop episodic scenarios instead of stopping after the last one",
-)
-parser.add_argument(
-    "--dqn-episode-len",
-    type=int,
-    help="Pseudo-episode length (steps) for DQN PRB allocator; 0 disables windowing",
-)
-parser.add_argument(
-    "--dqn-episode-no-done",
-    action="store_true",
-    help="Do not mark pseudo-episode boundaries as terminal transitions",
-)
-# SB3 DQN variant controls
-parser.add_argument("--sb3-dqn-prb", action="store_true", help="Enable SB3-based DQN PRB allocator xApp")
-parser.add_argument("--sb3-dqn-model", type=str, help="Path to load/save SB3 DQN model")
-parser.add_argument("--sb3-dqn-total-steps", type=int, help="Nominal total steps for SB3 progress schedule")
-parser.add_argument("--sb3-dqn-target-update", type=int, help="Target network update interval for SB3 DQN")
-parser.add_argument("--sb3-dqn-save-interval", type=int, help="Autosave interval (steps) for SB3 DQN model")
 # Gym-style PRB allocator
 parser.add_argument("--prb-gym", action="store_true", help="Enable Gym-style PRB allocator xApp")
 parser.add_argument("--prb-gym-config", type=str, help="Episode config JSON for the Gym-style PRB xApp")
@@ -288,19 +217,8 @@ if args.kpi_log:
 if args.kpi_log_dir:
     os.environ["RAN_KPI_LOG_DIR"] = args.kpi_log_dir
 
-# DQN env exports
+# DQN env exports (shared with Gym allocator)
 reload_settings = False
-if args.dqn_train:
-    os.environ["DQN_PRB_TRAIN"] = "1"
-    reload_settings = True
-else:
-    os.environ["DQN_PRB_TRAIN"] = "0"
-    reload_settings = True
-if args.dqn_prb:
-    os.environ["DQN_PRB_ENABLE"] = "1"
-if args.dqn_prb_simple:
-    os.environ["DQN_PRB_ENABLE"] = "1"
-    os.environ["DQN_PRB_SIMPLE_ENABLE"] = "1"
 if args.dqn_model:
     os.environ["DQN_PRB_MODEL_PATH"] = args.dqn_model
 if args.dqn_epsilon_start is not None:
@@ -323,29 +241,12 @@ if args.dqn_seq_hidden is not None:
     value = max(1, args.dqn_seq_hidden)
     os.environ["DQN_PRB_SEQ_HIDDEN"] = str(value)
     reload_settings = True
-if args.dqn_use_horizon:
-    os.environ["DQN_PRB_USE_DECISION_HORIZON"] = "1"
-    reload_settings = True
-if args.dqn_horizon_reduce:
-    os.environ["DQN_PRB_HORIZON_REDUCE"] = args.dqn_horizon_reduce
-    reload_settings = True
 if args.dqn_save_interval is not None:
     os.environ["DQN_PRB_SAVE_INTERVAL"] = str(max(0, args.dqn_save_interval))
 if args.dqn_device:
     os.environ["DQN_PRB_DEVICE"] = args.dqn_device
 if args.dqn_log_interval is not None:
     os.environ["DQN_PRB_LOG_INTERVAL"] = str(max(1, args.dqn_log_interval))
-if args.dqn_aux_future_state:
-    os.environ["DQN_PRB_AUX_FUTURE_STATE"] = "1"
-    reload_settings = True
-if args.dqn_aux_weight is not None:
-    value = max(0.0, args.dqn_aux_weight)
-    os.environ["DQN_PRB_AUX_WEIGHT"] = str(value)
-    reload_settings = True
-if args.dqn_aux_horizon is not None:
-    value = max(1, args.dqn_aux_horizon)
-    os.environ["DQN_PRB_AUX_HORIZON"] = str(value)
-    reload_settings = True
 if args.dqn_max_train_steps is not None:
     value = max(0, args.dqn_max_train_steps)
     os.environ["DQN_PRB_MAX_TRAIN_STEPS"] = str(value)
@@ -358,40 +259,10 @@ if args.dqn_target_update is not None:
     os.environ["DQN_PRB_TARGET_UPDATE"] = str(max(1, int(args.dqn_target_update)))
 
 _pending_settings_reload = reload_settings
-if args.dqn_episode_len is not None:
-    os.environ["DQN_PRB_EPISODE_LEN"] = str(max(0, args.dqn_episode_len))
-if args.dqn_episode_no_done:
-    os.environ["DQN_PRB_EPISODE_MARK_DONE"] = "0"
 if args.dqn_log_tb:
     os.environ["DQN_TB_ENABLE"] = "1"
 if args.dqn_tb_dir:
     os.environ["DQN_TB_DIR"] = args.dqn_tb_dir
-if args.dqn_wandb:
-    os.environ["DQN_WANDB_ENABLE"] = "1"
-if args.dqn_wandb_project:
-    os.environ["DQN_WANDB_PROJECT"] = args.dqn_wandb_project
-if args.dqn_wandb_name:
-    os.environ["DQN_WANDB_RUNNAME"] = args.dqn_wandb_name
-if args.dqn_prb_episodic:
-    os.environ["DQN_PRB_EPISODIC_ENABLE"] = "1"
-if args.dqn_episode_config:
-    os.environ["DQN_EPISODE_CONFIG_PATH"] = args.dqn_episode_config
-if args.dqn_episode_config_json:
-    os.environ["DQN_EPISODE_CONFIG_JSON"] = args.dqn_episode_config_json
-if args.dqn_episode_loop:
-    os.environ["DQN_EPISODE_LOOP"] = "1"
-
-# SB3 DQN env exports
-if args.sb3_dqn_prb:
-    os.environ["SB3_DQN_PRB_ENABLE"] = "1"
-if args.sb3_dqn_model:
-    os.environ["SB3_DQN_MODEL_PATH"] = args.sb3_dqn_model
-if args.sb3_dqn_total_steps is not None:
-    os.environ["SB3_DQN_TOTAL_STEPS"] = str(args.sb3_dqn_total_steps)
-if args.sb3_dqn_target_update is not None:
-    os.environ["SB3_DQN_TARGET_UPDATE"] = str(args.sb3_dqn_target_update)
-if args.sb3_dqn_save_interval is not None:
-    os.environ["SB3_DQN_SAVE_INTERVAL"] = str(args.sb3_dqn_save_interval)
 # Gym-style xApp env exports
 if args.prb_gym:
     os.environ["PRB_GYM_ENABLE"] = "1"

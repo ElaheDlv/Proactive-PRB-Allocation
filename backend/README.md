@@ -1,907 +1,230 @@
 # AI-RAN Simulator Backend
 
-The **AI-RAN Simulator Backend** is a Python-based simulation engine designed to model and analyze the behavior of 5G Radio Access Networks (RAN). It supports advanced features such as network slicing, mobility management, and intelligent control via xApps. This backend is part of a larger project that includes a frontend for visualization and interaction.
-
-## 📁 Project Structure
-
-backend/
-├── main.py # Entry point for the WebSocket server
-├── utils/ # Utility functions and classes
-├── settings/ # Configuration files for the simulation
-├── network_layer/ # network simulation logic
-├── knowledge_layer/ # knowledge base, offering explanations for everything in the network layer
-├── intelligence_layer/ # user-engaging and decision-making agents
+This backend is a customized build of the AI-RAN Simulator that we use to study proactive PRB allocation policies, replay measured traffic, and evaluate xApps under controlled topologies. It exposes a WebSocket API for the UI, supports a headless loop for offline RL training, and ships with tooling to create repeatable trace catalogs.
 
 ---
 
-## 📦 Requirements
+## 📁 Key Directories
 
-- Python 3.12 or higher
-- docker (to deploy the AI services)
-- Install dependencies using:
+- `main.py` – entry point that wires CLI flags/environment variables and starts the WebSocket server or headless loop.
+- `settings/` – tunables grouped by domain (`sim_config.py`, `ran_config.py`, `slice_config.py`, etc.). Every value can be overridden via environment variables or CLI flags exposed by `main.py`.
+- `network_layer/` – radio/link simulation, UE/base-station models, schedulers, and xApps (constant allocator, DQN agents, KPI dashboard, etc.).
+- `intelligence_layer/` & `knowledge_layer/` – RIC logic, explainability helpers, and orchestration utilities.
+- `utils/` – shared helpers, parsers, trace loaders.
+- `tools/` – standalone scripts (episode catalog converter, trace utilities).
+- `notebooks/` – traffic generation notebooks (Unified CMTC, CMDP generators, plotting helpers) plus JSON configs used by the xApps.
+- `assets/` – aligned trace CSVs, episodic catalogs, and other binary artifacts consumed at runtime.
+- `tb_logs/`, `evaluations/`, `models/` – training logs, evaluation runs, and stored checkpoints.
+
+---
+
+## ✅ Requirements & Installation
+
+- Python **3.12+**
+- Optional CUDA toolkit if training torch-based agents on GPU
+- Node.js (only if you plan to run the frontend)
 
 ```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 🛠️ Usage
-
-1. Start the WebSocket Server <br>Run the backend server to enable communication with the frontend:
-
-   ```bash
-   python main.py
-   ```
-
-2. Start the frontend <br>
-
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+> Tip: copy `backend/.env.example` (if present) to `.env` to persist frequently used overrides such as topology presets or logging paths.
 
 ---
 
-## 🧪 Simple Topology (1 BS • 1 Cell • ~10 UEs)
+## 🚀 Running the Backend
 
-For quick experiments and debugging, a simple preset is available. It reduces the network to one base station with a single n78 cell and spawns about 10 UEs.
+The backend runs in two modes:
 
-Two ways to enable it:
+| Mode    | Description |
+|---------|-------------|
+| `server` (default) | Spins up the WebSocket server (default `ws://localhost:8763`) plus the Dash KPI dashboard (default `http://localhost:8059`). Use this when driving the UI. |
+| `headless` | Runs the simulator loop without any sockets. Useful for RL training, sweeps, or scripted evaluations. Requires `--steps` to bound the run. |
 
-- CLI flags (recommended)
-
-  - Server mode (WebSocket server, controlled by the UI/client):
-
-    ```bash
-    python main.py --preset simple --ue-max 10 --mode server
-    ```
-
-  - Headless mode (no WebSocket, runs a short simulation loop and starts xApps like the KPI dashboard):
-
-    ```bash
-    python main.py --preset simple --ue-max 10 --mode headless --steps 120
-    # Open the KPI dashboard at http://localhost:8061
-    ```
-
-- Environment variables (alternative)
-
-  - Create a `.env` in `backend/` or export in shell:
-
-    ```bash
-    export RAN_TOPOLOGY_PRESET=simple
-    export UE_DEFAULT_MAX_COUNT=10
-    python main.py
-    ```
-
-What the preset does:
-
-- Base stations: 1 (`bs_1`), see `settings/ran_config.py`.
-- Cells: 1 n78 cell attached to `bs_1`.
-- UE caps: spawn 1–2 per step, max ≈ 10 (overridable by `--ue-max` or `UE_DEFAULT_MAX_COUNT`).
-
-Return to the full 4‑BS/8‑cell topology by omitting `--preset` (or setting `--preset default`).
-
-### Control how many UEs per slice (simple preset)
-
-You can explicitly choose how many UEs are subscribed to each slice when using the simple preset. These UEs attach to their single subscribed slice deterministically.
-
-- With CLI flags:
+Launch with:
 
 ```bash
-python main.py --preset simple --ue-max 10 \
-  --ue-embb 6 --ue-urllc 3 --ue-mmtc 1 
+python main.py [--mode server|headless] [options...]
 ```
 
-- With environment variables:
+### Topology & UE Controls
+
+- `--preset default|simple` – the simple preset keeps one gNB/n78 cell active.
+- `--ue-max N` – cap simultaneous UEs (overrides `UE_DEFAULT_MAX_COUNT`).
+- `--ue-embb/--ue-urllc/--ue-mmtc` – in the simple preset, deterministically spawn exactly this many subscribers per slice.
+- `--freeze-mobility` (or `SIM_FREEZE_MOBILITY=1`) – pin UE locations to keep SINR/MCS constant so PRB changes are isolated.
+- `--sim-step S` – simulation step length in seconds (default 1.0).
+- `--steps K` – number of steps to run in headless mode.
+
+Example (server mode, deterministic slice mix, stationary UEs):
 
 ```bash
-export RAN_TOPOLOGY_PRESET=simple
-export UE_DEFAULT_MAX_COUNT=10
-export UE_SIMPLE_COUNT_EMBB=6
-export UE_SIMPLE_COUNT_URLLC=3
-export UE_SIMPLE_COUNT_MMTC=1
-python main.py
-```
-
-Notes:
-- Total UEs = sum of the slice counts when `--preset simple`. If you also pass `--ue-max` and it differs, the backend adjusts the total to match the sum of slice counts.
-- Omit the slice counts to keep the default randomized distribution.
-- Runtime spawn is still dynamic (1–2 per step in simple mode); slice membership is fixed per IMSI.
-
----
-
-
----
-
-## 🧪 Isolate PRB Effects (Freeze Mobility)
-
-If you want KPI changes to come only from PRB allocation (and not from UE movement changing SINR/CQI/MCS), freeze mobility so UEs stay stationary.
-
-Enable via CLI flag or environment variable (works in both server and headless modes):
-
-```bash
-# From backend/
-export SIM_FREEZE_MOBILITY=1
 python main.py --preset simple --mode server \
-  --ue-max 3 --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
-  --freeze-mobility
-
+  --ue-embb 4 --ue-urllc 3 --ue-mmtc 3 \
+  --freeze-mobility --sim-step 0.5
 ```
 
-What this does:
+Example (headless run with a capped UE population):
 
-- Sets all UE speeds to 0 at creation/registration and pins their targets to current positions.
-- With positions fixed, radio KPIs (SINR/CQI/MCS) stay constant. DL Mbps then changes only when you adjust PRB allocation (slice shares/Move‑RB/per‑UE cap) or the offered load (traces/AI services).
-
-Tip: You usually don’t need to freeze radio; freezing mobility is sufficient in this simulator to keep the radio constant.
+```bash
+python main.py --preset simple --mode headless \
+  --steps 1200 --ue-max 12 --freeze-mobility
+```
 
 ---
 
-## 📈 Replay Raw CSV Traces (per‑UE offered load)
+## 📡 Traffic & Mobility
 
-Attach a raw packet CSV so its offered traffic is replayed and served subject to radio capacity and PRB allocation.
+### Freeze Mobility
 
-Downlink replay and buffering happen at the gNB (Base Station): the BS owns a per‑UE DL queue (bytes) and a per‑UE DL trace replayer (samples, clock, idx). Each simulation step, the BS advances replay clocks and enqueues due DL bytes; cells then serve from the BS queue up to capacity. The UE’s `dl_buffer_bytes` is updated as a mirror for the UI (it reflects the gNB queue).
+`--freeze-mobility` or `SIM_FREEZE_MOBILITY=1` sets UE speeds to zero and locks the target position upon registration. This is the recommended switch when comparing PRB policies because radio quality then becomes a pure function of the configured traces and PRB allocations.
 
-- CLI flags:
-  - `--trace-speedup <x>` (scale time; default 1.0)
-  - `--strict-real-traffic` (show only served traffic; no fallback capacity)
-  - `--trace-raw-map IMSI_#:path/to/raw.csv:UE_IP` (Wireshark/PCAP CSV; UE_IP required to classify DL/UL)
-    You can also attach by slice or ALL UEs:
-    - `--trace-raw-map slice:eMBB:path/to/embb.csv:UE_IP`
-    - `--trace-raw-map ALL:path/to/trace.csv:UE_IP`
-  - `--trace-bin <seconds>` (aggregation bin for raw CSV; default 1.0; set to 0 or a negative value to disable binning and replay using the exact timestamps from the CSV)
-- `--trace-overhead-bytes <n>` (subtract per-packet bytes in raw CSV; default 0)
-- `--trace-loop` (replay traces continuously)
-- `--slice-prb SLICE=PRBs` (repeatable; sets the initial downlink PRB quota for a slice, e.g. `--slice-prb eMBB=40 --slice-prb URLLC=20`)
+### Real Trace Replay
 
-Key trace flags (what they do):
+Attach per-UE or per-slice CSV traces via `--trace-raw-map`. Each mapping takes one of the following forms:
 
-- `--trace-speedup <x>`: scales the replay clock. 1.0 = real time. 2.0 replays twice as fast (the same traced seconds happen in half the wall-clock time); 0.5 replays at half speed. Affects when DL samples are enqueued into the gNB DL queue; serving still happens per simulation step.
-- `--trace-bin <seconds>`: aggregation window for raw packet CSVs. Packets are grouped by `floor((t - t0)/bin)*bin` and summed to produce `(t, dl_bytes, ul_bytes)` samples. Smaller bins (e.g., 0.2) preserve burstiness; larger bins (e.g., 2.0) smooth traffic. Default 1.0 aligns with the simulator’s 1 s step. Supplying 0 (or any negative value) disables binning so the replay follows each timestamp exactly as provided in the CSV.
-- `--trace-loop`: when enabled, traces repeat seamlessly after the last sample. Without this, each trace plays once and stops offering new bytes after the end.
+- `IMSI_#:path/to/trace.csv:UE_IP`
+- `slice:eMBB:path/to/trace.csv:UE_IP`
+- `ALL:path/to/trace.csv:UE_IP`
 
-Examples:
+Important flags:
+
+- `--trace-speedup X` – compress/expand the trace timeline.
+- `--trace-bin seconds` – aggregate packets before enqueuing. Use `0` (or negative) to replay the original timestamps.
+- `--trace-loop` – restart the trace when it reaches the end.
+- `--trace-overhead-bytes N` – subtract headers/trailers before the bytes are added to the buffers.
+- `--strict-real-traffic` – report only the replayed traffic (disables fallback throughput smoothing).
+- `--trace-debug[(-imsi)]` – inspect replay buffers.
+- `--trace-validate-only` – ensure files exist and exit.
+
+Example (one UE per slice, looping traces, strict replay):
 
 ```bash
-# Using raw packet CSVs (Wireshark export) — headless
-python backend/main.py --preset simple --mode headless --steps 180 \
-  --trace-raw-map IMSI_2:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Using raw packet CSVs (Wireshark export) — server
-python backend/main.py --preset simple --mode server \
-  --trace-raw-map IMSI_2:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs (raw traces only), headless (one per slice)
-python backend/main.py --preset simple --mode headless --steps 180 \
-  --freeze-mobility \
+python main.py --preset simple --mode server --freeze-mobility \
   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
-  --trace-raw-map IMSI_0:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, eMBB-only (all use eMBB trace)
-python backend/main.py --preset simple --mode headless --steps 180 \
-  --freeze-mobility --ue-embb 3 --ue-urllc 0 --ue-mmtc 0 \
-  --trace-raw-map IMSI_0:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, eMBB-only — server
-python backend/main.py --preset simple --mode server \
-  --freeze-mobility --ue-embb 3 --ue-urllc 0 --ue-mmtc 0 \
-  --trace-raw-map IMSI_0:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, URLLC-only (all use URLLC trace)
-python backend/main.py --preset simple --mode headless --steps 180 \
-  --freeze-mobility --ue-embb 0 --ue-urllc 3 --ue-mmtc 0 \
-  --trace-raw-map IMSI_0:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, URLLC-only — server
-python backend/main.py --preset simple --mode server \
-  --freeze-mobility --ue-embb 0 --ue-urllc 3 --ue-mmtc 0 \
-  --trace-raw-map IMSI_0:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, mMTC-only (all use mMTC trace)
-python backend/main.py --preset simple --mode headless --steps 180 \
-  --freeze-mobility --ue-embb 0 --ue-urllc 0 --ue-mmtc 3 \
-  --trace-raw-map IMSI_0:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs, mMTC-only — server
-python backend/main.py --preset simple --mode server \
-  --freeze-mobility --ue-embb 0 --ue-urllc 0 --ue-mmtc 3 \
-  --trace-raw-map IMSI_0:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-# Three stationary UEs (raw traces only), server mode (one per slice)
-python backend/main.py --preset simple --mode server \
-  --freeze-mobility \
-  --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
-  --trace-raw-map IMSI_0:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_1:backend/assets/traces/urllc_04_10.csv:172.30.1.1 \
-  --trace-raw-map IMSI_2:backend/assets/traces/mmtc_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic
-
-
-  # Three stationary UE (raw traces only), server mode (one per slice) use of mixed file seperated into 3 different files
-
-  python backend/main.py --preset simple --mode server   --freeze-mobility   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1   --trace-raw-map IMSI_0:backend/assets/traces/eMBB.csv:172.30.1.1   --trace-raw-map IMSI_1:backend/assets/traces/URLLC.csv:172.30.1.1   --trace-raw-map IMSI_2:backend/assets/traces/mMTC.csv:172.30.1.1   --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
-# Three generated test data for three UE
-
-  python backend/main.py --preset simple --mode server   --freeze-mobility   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1   --trace-raw-map IMSI_0:backend/assets/traces/embb_gen.csv:172.30.1.1   --trace-raw-map IMSI_1:backend/assets/traces/urllc_gen.csv:172.30.1.1   --trace-raw-map IMSI_2:backend/assets/traces/mmtc_gen.csv:172.30.1.1   --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
-# Three generated test data for three UE
-  python backend/main.py --preset simple --mode server   --freeze-mobility   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1   --trace-raw-map IMSI_0:backend/assets/traces/synthetic_embb.csv:172.30.1.1   --trace-raw-map IMSI_1:backend/assets/traces/synthetic_urllc.csv:172.30.1.1   --trace-raw-map IMSI_2:backend/assets/traces/synthetic_mmtc.csv:172.30.1.1   --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
-# Three generated test data for three UE with queuing 
-  python backend/main.py --preset simple --mode server   --freeze-mobility   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1   --trace-raw-map IMSI_0:backend/assets/traces/synthetic_embb_queueing.csv:172.30.1.1   --trace-raw-map IMSI_1:backend/assets/traces/synthetic_urllc_queueing.csv:172.30.1.1   --trace-raw-map IMSI_2:backend/assets/traces/synthetic_mmtc_queueing.csv:172.30.1.1   --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
-python backend/main.py --preset simple --mode server   --freeze-mobility   --ue-embb 1 --ue-urllc 1 --ue-mmtc 1   --trace-raw-map IMSI_0:backend/assets/traces/eMBB_aligned.csv:172.30.1.1   --trace-raw-map IMSI_1:backend/assets/traces/URLLC_aligned.csv:172.30.1.1   --trace-raw-map IMSI_2:backend/assets/traces/mMTC_aligned.csv:172.30.1.1   --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
+  --trace-raw-map IMSI_0:backend/assets/traces/eMBB_aligned.csv:10.0.0.2 \
+  --trace-raw-map IMSI_1:backend/assets/traces/URLLC_aligned.csv:10.0.0.1 \
+  --trace-raw-map IMSI_2:backend/assets/traces/mMTC_aligned.csv:10.0.0.3 \
+  --trace-bin 1 --trace-speedup 1 --trace-loop --strict-real-traffic
 ```
-
-How it works:
-- Each UE with a trace enqueues `dl_bytes` into a per‑UE buffer at the traced times (scaled by `--trace-speedup`).
-- Cells compute capacity from MCS×PRBs and serve from the buffer up to that capacity each step.
-- With `--strict-real-traffic`, UE DL Mbps equals served traffic; otherwise, empty buffers show achievable capacity.
-
-Notes:
-- Traces are attached by IMSI on spawn/registration. Ensure those IMSIs exist during the run (use `--ue-max`/slice counts with simple preset).
-- Place CSVs anywhere; `backend/assets/traces/` is a convenient location.
-- Headless mode runs for exactly `--steps` iterations and then exits. Use server mode for an open‑ended run controlled from the frontend (http://localhost:3000) or a WebSocket client.
 
 ---
 
-### Attach Traces to All UEs or by Slice (many UEs)
+## 🧠 xApps & Control Loops
 
-##### This part is still not working properly
+All xApps live in `network_layer/xApps/`. Enable them through CLI flags (which set the corresponding env vars) or directly via the settings files.
 
-When running with many UEs, you can attach traces without listing every IMSI individually:
+### Live KPI Dashboard (`xapp_live_kpi_dashboard.py`)
 
-- Same trace for all UEs (wildcard):
+- Starts automatically when `main.py` is run in server mode.
+- Use `--dash-port` to change the HTTP port.
+- `--kpi-history`, `--kpi-max-points N`, `--kpi-log`, `--kpi-log-dir path` control caching and CSV logging.
+- Interactive controls include per-slice PRB sliders, Move-RB buttons, and per-UE PRB caps.
 
-```bash
-python backend/main.py --preset simple --mode server \
-  --ue-max 30 --freeze-mobility \
-  --trace-raw-map ALL:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-```
+### Constant PRB Allocator (`xapp_prb_constant_allocator.py`)
 
-- Different traces per slice (applies to any number of UEs in each slice):
+Baseline allocator that pins slice quotas to known values and logs average throughput/latency.
 
 ```bash
-python backend/main.py --preset simple --mode server \
-  --ue-embb 10 --ue-urllc 10 --ue-mmtc 10 --freeze-mobility \
-  --trace-raw-map slice:eMBB:backend/assets/traces/eMBB_aligned.csv:172.30.1.1 \
-  --trace-raw-map slice:URLLC:backend/assets/traces/URLLC_aligned.csv:172.30.1.1 \
-  --trace-raw-map slice:mMTC:backend/assets/traces/mMTC_aligned.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
+python main.py --prb-const --prb-const-embb 40 --prb-const-urllc 20 \
+  --prb-const-log-interval 2000
 ```
 
-Semantics:
-- `IMSI_#:` maps a specific UE.
-- `ALL:` applies to any UE not matched by a specific mapping.
-- `slice:<NAME>:` applies to UEs registered on that slice (`eMBB`, `URLLC`, `mMTC`).
-  Priority: exact IMSI > slice mapping > ALL.
+### Gym-style PRB Allocator (`xapp_prb_gym_allocator.py`)
 
-Notes:
-- PRB allocation already covers all UEs in each cell; with the above, every UE will replay its trace and compete for PRBs.
-- Freezing mobility keeps radio stable so differences come from offered load and PRB allocation.
+A clean-room environment that exposes a Gym-like `reset/step` API and maintains its own DQN (MLP or LSTM) per the episode catalog stored in `PRB_GYM_CONFIG_PATH`.
 
-### RL PRB Allocation + Traces (many UEs)
+Key flags:
 
-You can combine the DQN PRB allocator xApp with the multi‑UE trace mapping above to learn PRB shifts under realistic traffic. Install PyTorch first:
+- `--prb-gym --prb-gym-config backend/assets/episodes/<file>.json`
+- `--prb-gym-loop`, `--prb-gym-shuffle`
+- `--prb-gym-eps-decay N` – linear epsilon decay across total decisions
+- `--prb-gym-load-model path` – resume training/eval
+- `--prb-gym-eval` – skip replay buffer updates for pure evaluation
+ - `--dqn-model path/to/model.pt` – load/save checkpoints for the Gym agent.
+ - DQN hyperparameters stay under the familiar `--dqn-*` switches:
+   - `--dqn-period`, `--dqn-move-step`, and `--dqn-max-train-steps` to control action cadence.
+   - `--dqn-epsilon-start/end/decay`, `--dqn-lr`, `--dqn-gamma`, `--dqn-target-update`, `--dqn-save-interval`, `--dqn-log-interval`.
+   - `--dqn-model-arch mlp|lstm|tcn|seq2seq`, `--dqn-seq-len`, `--dqn-seq-hidden`, `--dqn-device`.
+   - `--dqn-log-tb`, `--dqn-tb-dir` to emit TensorBoard traces.
 
-```bash
-pip install torch
-```
+### Other xApps
 
-- Per‑slice traces with RL (any number of UEs per slice):
-
-```bash
-python backend/main.py --preset simple --mode server \
-  --ue-embb 10 --ue-urllc 10 --ue-mmtc 10 --freeze-mobility \
-  --trace-raw-map slice:eMBB:backend/assets/traces/eMBB_aligned.csv:172.30.1.1 \
-  --trace-raw-map slice:URLLC:backend/assets/traces/URLLC_aligned.csv:172.30.1.1 \
-  --trace-raw-map slice:mMTC:backend/assets/traces/mMTC_aligned.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-speedup 1.0 --strict-real-traffic --trace-loop \
-  --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --kpi-history --kpi-log
-```
-
-- Same trace for all UEs with RL:
-
-```bash
-python backend/main.py --preset simple --mode server \
-  --ue-max 30 --freeze-mobility \
-  --trace-raw-map ALL:backend/assets/traces/embb_04_10.csv:172.30.1.1 \
-  --trace-bin 1.0 --trace-speedup 1.0 --strict-real-traffic --trace-loop \
-  --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --kpi-history --kpi-log
-```
-
-Tips and knobs:
-- `--dqn-period N` acts every N sim steps (default 1). With the default 1 s step, `N=1` roughly corresponds to T=1 s; adjust if you want a different control period.
-- `--dqn-move-step K` moves K PRBs per action (Table 3 uses 1 RB).
-- A pre‑trained model can be pointed to with `--dqn-model backend/models/dqn_prb.pt` (this is also the default path); omit `--dqn-train` to run inference only.
-- Use the KPI dashboard with history (`--kpi-history --kpi-log`) to monitor slice PRBs, DL Mbps, buffers, and the effect of PRB moves.
-
-## 📉 LSTM Forecast Plots (Event Histories)
-
-Use `backend/notebooks/plot_and_predict_runner.py` to train PyTorch LSTM forecasters directly on packet event histories—no resampling. Each sample contains the last *N* packets (zero-padded when the history is shorter) so no arrivals are lost. You can choose which per-packet features to expose (e.g., `Length` only, or `Δt + Length`) or even force a uniform time grid (auto-detected minimum gap) via `--feature-sets`.
-
-- Basic run (auto-selects CUDA if available):
-
-  ```bash
-  python backend/notebooks/plot_and_predict_runner.py backend/assets/traces/URLLC_aligned.csv \
-    --epochs 15 --window 20 --output-dir backend/assets/plots
-  ```
-
-- Alternate trace and settings (force CPU, tweak batch size/hidden dim):
-
-  ```bash
-  python backend/notebooks/plot_and_predict_runner.py backend/assets/traces/eMBB_aligned.csv \
-    --epochs 20 --window 30 --batch-size 16 --hidden-dim 128 --feature-sets length --device cpu
-  ```
-- If we want to use all three methods:
-  ```bash
-    python backend/notebooks/plot_and_predict_runner.py backend/assets/traces/URLLC_aligned.csv \
-  --epochs 15 --window 20 --output-dir backend/assets/plots \
-  --feature-sets length delta_t+length uniform-length
-
-  python backend/notebooks/plot_and_predict_runner.py backend/assets/traces/eMBB_M3_aligned_trace.csv \
-  --window 128 --hidden-dim 256 --num-layers 2 --dropout 0.2 --fc-hidden 128 \
-  --include-pad-mask --use-log-target --loss huber --huber-delta 2.0 \
-  --zero-weight 0.3 --val-ratio 0.1 --early-stop 10 --plateau-patience 5 --clip-grad 1.0
-
-
-python backend/notebooks/prev_plot_and_predict_runner.py backend/assets/traces/eMBB_M3_aligned_trace.csv \
-  --feature-sets length delta_t+length uniform-length \
-  --window 128 --hidden-dim 256 --num-layers 2 \
-  --val-ratio 0.1 --early-stop 10 --epochs 80 --batch-size 64
-
-python backend/notebooks/prev_plot_and_predict_runner.py backend/assets/traces/<trace>.csv \
-  --feature-sets time+length \
-  --optimizer adamw --learning-rate 5e-4 \
-  --loss smoothl1 --lr-scheduler plateau --lr-factor 0.6 --lr-patience 25
-
-  ```
-- Multiple traces: run once per file to populate a common folder; each call writes `traceName_epochsX_regular.png` and `traceName_epochsX_irregular.png` with axes labelled in milliseconds and bytes:
-
-  ```bash
-  for trace in backend/assets/traces/URLLC_aligned.csv backend/assets/traces/eMBB_aligned.csv; do
-    python backend/notebooks/plot_and_predict_runner.py "$trace" --epochs 10 --output-dir backend/assets/plots
-  done
-  ```
-
-Options:
-- `--window` controls how many past packets feed the model (default 20).
-- `--feature-sets` accepts one or more of `{length, delta_t+length, uniform-length}`.
-  - `length`: raw event history, `Length` feature only (sequence padding handles gaps).
-  - `delta_t+length`: raw event history with an extra `Δt` channel so the model learns inter-arrival spacing explicitly.
-  - `uniform-length`: expands the trace onto a uniform grid using roughly the 5th percentile of observed Δt (protects against tiny jitter), zero-fills missing slots, then trains on `Length` alone. The step size is further relaxed if the grid would exceed ~2M points so training stays tractable.
-- Model capacity knobs: `--hidden-dim`, `--num-layers`, `--dropout`, and `--fc-hidden` (adds an additional dense layer after the LSTM) help capture bursty traffic when the defaults underfit.
-- Training behaviour knobs: choose the target space (`--target-mode raw|scaled|log`), optionally append a padding mask (`--include-pad-mask`), pick the loss (`--loss` + `--huber-delta`), rebalance zeros (`--zero-weight`), clip gradients (`--clip-grad`), and control validation (`--val-ratio`, `--early-stop`, `--plateau-patience`).
-- `--device auto|cpu|cuda` to override accelerator selection (use `cpu` if GPU memory is tight).
-- `--output-dir` defaults to `plots/` in the repo root if not provided.
-
-These same padded histories drive the optional LSTM-enabled PRB allocator: set `DQN_PRB_SEQ_LEN` (>1) in `settings` to let the RL agent observe the last *N* decision states. Reduce the value or run on CPU if sequence processing becomes too heavy.
-
-
-## 📊 Live KPI Dashboard xApp
-
-Drop-in xApp that starts a Dash server at `http://localhost:8061` and streams per‑UE and per‑cell KPIs.
-
-- Per‑UE: bitrate (Mbps), SINR, CQI, allocated PRBs.
-- Per‑cell: load, PRB usage; fixed PRB quotas per slice (eMBB/URLLC/mMTC).
-- Controls:
-  - `Max DL PRBs per UE` cap (applies live to all cells).
-  - Slice share sliders (fractions 0–1 per slice). Sum > 1 is normalized; < 1 leaves some PRBs unused.
-  - “Move RB” buttons to shift PRBs between slices (paper-like actions). Default step moves 3 PRBs per click; change in `network_layer/xApps/xapp_live_kpi_dashboard.py` by editing `SLICE_MOVE_STEP_PRBS`.
-  - Optional history range slider, plot history window size, and CSV logging (see below).
-
-Slice share semantics:
-
-- For each cell, `quota[slice] = floor(max_dl_prb_cell × share[slice])`.
-- UEs in a slice share only that slice’s quota. Baseline 1 PRB/UE if possible, remainder proportional to demand.
-- Per‑UE cap is enforced after slice allocation.
+`xapp_A3_handover_blind.py` (A3-based HO), `xapp_AI_service_monitor.py` (health monitoring), and helper modules remain in the tree. Enable them from `settings/ric_config.py` when needed.
 
 ---
 
-### KPI History, Range Slider, and Logging
+## 📊 Trace Catalogs & Tooling
 
-Enable interactive history navigation on charts (range slider), configure how many points the live plots keep in memory, and optionally persist KPIs to CSV.
+### Unified CMTC Traffic Generator
 
-- CLI flags:
-  - `--kpi-history`: enable a per‑chart range slider and preserve zoom/pan across live updates.
-  - `--kpi-max-points <N>`: number of points kept in memory for plots (default 50). Use `0` for unbounded history.
-  - `--kpi-log`: write per‑step UE/Cell KPIs to CSV files.
-  - `--kpi-log-dir <path>`: output directory for KPI CSVs (default `backend/kpi_logs`).
+The notebooks under `notebooks/Unified_CMTC*/` create aligned traces from CTMC/traffic parameters. Typical workflow:
 
-- Environment variables (alternative):
-  - `RAN_KPI_HISTORY_ENABLE=1`
-  - `RAN_KPI_MAX_POINTS=<N>` (0 = unbounded)
-  - `RAN_KPI_LOG_ENABLE=1`
-  - `RAN_KPI_LOG_DIR=<path>`
+1. Configure the scenario in `config_for_run.ipynb` or `Unified_Final_CMTC_traffic_generator*.ipynb`.
+2. Export aligned per-slice CSVs to `backend/notebooks/Unified_CMTC/.../traces/aligned/`.
+3. Copy or symlink the generated traces into `backend/assets/traces/` (or reference directly via `--trace-raw-map`).
 
-- Example (server mode):
-```bash
-python backend/main.py --preset simple --mode server \
-  --kpi-history --kpi-max-points 10000 --kpi-log --kpi-log-dir backend/kpi_logs
-# KPI dashboard at http://localhost:8061
-```
+### Plotting & Forecasting
 
-Notes:
-- With the history slider enabled, legends are placed at the top to avoid overlap with the slider.
-- Unbounded history (0) grows with runtime and number of UEs; prefer a large but finite window for long runs (e.g., 5000–20000).
-- CSV logs include one row per UE and per cell per step. UE CSV columns: `sim_step, imsi, dl_bps, dl_mbps, sinr_db, cqi, dl_buffer_bytes, dl_prb_granted, dl_prb_requested, dl_latency_ms`. Cell CSV: `sim_step, cell_id, dl_load, allocated_prb, max_prb`.
-
----
-
-## 🧠 Example xApps
-
-Example xApps are located in the `network_layer/xApps/` directory:
-
-- Blind Handover xApp: Implements handover decisions based on RRC Event A3.
-- AI service monitoring xApp: Monitors the AI service performance and provides insights.
- - Live KPI Dashboard xApp: Real‑time UE/Cell KPIs with per‑UE cap and per‑slice PRB controls.
-- DQN PRB Allocator xApp: Learns to shift DL PRBs among eMBB/URLLC/mMTC slices using a DQN policy inspired by the Tractor paper.
-- Episodic DQN PRB Allocator xApp: Automates offline RL by replaying a catalog of UE/trace scenarios one episode at a time, resetting the simulator between traces so the DQN trains on finite windows instead of the continual stream.
-- Gym PRB Allocator xApp: Clean-room, two-slice (eMBB/URLLC) DQN agent that speaks a Gym-style API (reset/step) and runs over fully scripted episodes defined in JSON.
-- SB3 DQN PRB Allocator xApp: Same objective as the DQN PRB allocator but powered by Stable-Baselines3.
-
-To load custom xApps, add them to the xApps/ directory and ensure they inherit from the xAppBase class.
-
-### DQN PRB Allocator xApp
-
-The DQN xApp implements a small DQN agent that observes per‑cell state and applies the 7 actions from Table 3 in the Tractor paper (move one PRB between slices or keep).
-
-- State per cell: normalized UE mix, per-slice PRB share, served throughput, buffer backlog, PRB demand, and grant satisfaction ratios for mMTC/URLLC/eMBB (18 features).
-- Actions: each slice (eMBB/URLLC/mMTC) chooses `{-1, 0, +1}` to decrease keep or increase its quota by `DQN_PRB_MOVE_STEP` PRBs, yielding `3^3 = 27` discrete actions (all-zero means keep current quotas).
-- Reward: weighted sum of per-slice scores that scale with slice demand (eMBB: throughput & drained queues under high pressure, URLLC: exponential delay penalty & reliability, mMTC: efficient use of reserved PRBs while avoiding oversupply), each normalised to [0,1].
-- Fine-tune how aggressively demand boosts each slice score via `DQN_NEED_SATURATION` (default `1.5`, higher = more headroom before the need term saturates).
-
-- State normalization: `backend/network_layer/xApps/xapp_dqn_prb_allocator.py:270-320` scales UE counts by `UE_DEFAULT_MAX_COUNT`, PRB quotas by each cell’s `max_dl_prb`, throughput by `DQN_NORM_MAX_DL_MBPS`, buffers by `DQN_NORM_MAX_BUF_BYTES`, and demand/grant ratios to keep all features near `[0,1]`.
-- Network/optimizer: both the handcrafted DQN xApp and the SB3 variant use a fully-connected network `18 → 256 → 7` with ReLU and the Adam optimiser at learning rate `0.01`, matching the Tractor paper’s configuration while automatically adjusting to our state/action dimensions.
-
-Enable it at runtime (requires `torch`):
+`backend/notebooks/plot_and_predict_runner.py` trains PyTorch LSTMs over packet histories and generates plots for trace sanity checks. Use it to visualise new traces before feeding them to the simulator:
 
 ```bash
-pip install torch  # if not already installed
-
-# Server mode with DQN (online training), the KPI dashboard, and range slider
-python backend/main.py --preset simple --mode server \
-  --dqn-prb --dqn-train --dqn-period 2 --dqn-move-step 1 \
-  --kpi-history --kpi-log
+python backend/notebooks/plot_and_predict_runner.py backend/assets/traces/eMBB_aligned.csv \
+  --epochs 20 --window 30 --output-dir backend/assets/plots
 ```
 
-Useful flags/env vars:
-- `--dqn-prb` (or `DQN_PRB_ENABLE=1`): enable the DQN xApp.
-- `--dqn-train` (or `DQN_PRB_TRAIN=1`): enable online training. Omit it to run in pure evaluation/inference mode (weights stay frozen).
-- `--dqn-model <path>` (or `DQN_PRB_MODEL_PATH`): save/load model weights (default `backend/models/dqn_prb.pt`).
-- `--dqn-period <steps>` (`DQN_PRB_DECISION_PERIOD_STEPS`): act every N sim steps (default 2 → ~100 ms with the 50 ms sim step).
-- `--dqn-move-step <PRBs>` (`DQN_PRB_MOVE_STEP`): PRBs moved per action (default 1).
-- `--dqn-lr <value>` (`DQN_PRB_LR`): learning rate for the custom DQN (default 1e-2).
-- `--dqn-gamma <value>` (`DQN_PRB_GAMMA`): discount factor (default 0.99).
-- `--dqn-target-update <steps>` (`DQN_PRB_TARGET_UPDATE`): decision steps between target-network syncs (default 200).
-- `--dqn-save-interval <steps>` (`DQN_PRB_SAVE_INTERVAL`): checkpoint the custom DQN every N decisions (writes both the base file and a `_stepN` snapshot); 0 disables periodic saves.
-- `--dqn-device <device>` (`DQN_PRB_DEVICE`): execution device for the custom DQN (`auto`, `cpu`, `cuda`, `cuda:0`, …); defaults to auto-select GPU when available.
-- `--dqn-log-interval <steps>` (`DQN_PRB_LOG_INTERVAL`): log TensorBoard/W&B scalars every N decisions instead of every step (default 1).
-- `--dqn-aux-future-state` (`DQN_PRB_AUX_FUTURE_STATE`): add an auxiliary head that predicts the next state vector to shape temporal representations.
-- `--dqn-aux-weight <λ>` (`DQN_PRB_AUX_WEIGHT`): loss weight for the auxiliary prediction head (default 0.1).
-- `--dqn-aux-horizon <steps>` (`DQN_PRB_AUX_HORIZON`): number of future steps used as the auxiliary prediction target (default 1).
-- `--dqn-episode-len <steps>` (`DQN_PRB_EPISODE_LEN`): treat every N decisions as a pseudo-episode for logging/bootstrapping (0 disables; default 0).
-- `--dqn-episode-no-done` (or `DQN_PRB_EPISODE_MARK_DONE=0`): keep transitions non-terminal at pseudo-episode boundaries.
-- `DQN_PRB_DEBUG_STATE=1` (and optional `DQN_PRB_DEBUG_INTERVAL=N`): log raw slice KPIs plus the normalised 18-value observation vector every N decisions for easier inspection.
-- `DQN_PRB_MODEL_ARCH` / `--dqn-model-arch`: choose the feature extractor for the custom DQN (`mlp`, `lstm`, `tcn`, `seq2seq`). Non-MLP options consume the last `DQN_PRB_SEQ_LEN` (or `--dqn-seq-len`) state snapshots (>=2 recommended).
-- `DQN_PRB_SEQ_LEN` / `--dqn-seq-len`: number of consecutive observations fed to sequential extractors (minimum enforced at 2).
-- `DQN_PRB_SEQ_HIDDEN` / `--dqn-seq-hidden`: hidden size for sequential extractors (default 128).
-- `SIM_STEP_TIME_DEFAULT=<seconds>`: set the simulated wall-clock duration of each step (default 1.0 s). Combined with `--dqn-period` this controls how often the PRB allocator acts.
-- Exploration and learning hyper‑params can be set via env vars: `DQN_PRB_EPSILON_START`, `DQN_PRB_EPSILON_END`, `DQN_PRB_EPSILON_DECAY`, `DQN_PRB_LR`, `DQN_PRB_BATCH`, `DQN_PRB_BUFFER`, `DQN_PRB_GAMMA`.
-- `--ws-host` / `WS_SERVER_HOST`: WebSocket host for the backend (default `localhost`).
-- `--ws-port` / `WS_SERVER_PORT`: WebSocket port for the backend (default `8760`).
-- `--dash-port` / `DASH_PORT`: port for the live KPI dashboard xApp (default `8050`).
-- Frontend instances read `NEXT_PUBLIC_WS_HOST`, `NEXT_PUBLIC_WS_PORT`, and `NEXT_PUBLIC_WS_PROTOCOL` to decide which backend WebSocket to connect to.
+### Convert Training Configs to Gym Episodes
 
-#### Episodic training mode
-
-Need finite-length rollouts instead of the continual stream? Enable the episodic variant of the xApp:
+`backend/tools/convert_training_configs_to_gym_catalog.py` translates the legacy `xapp_dqn_training_configs*.json` files produced by the notebooks into the episodic format consumed by the Gym xApp.
 
 ```bash
-python backend/main.py --preset simple --mode headless \
-  --dqn-prb-episodic --dqn-train \
-  --dqn-episode-config backend/assets/episodes/sample_config.json
-```
-
-New CLI/env switches:
-
-- `--dqn-prb-episodic` (`DQN_PRB_EPISODIC_ENABLE=1`): activate the episodic xApp (the standard DQN xApp stays off).
-- `--dqn-episode-config <path>` (`DQN_EPISODE_CONFIG_PATH`): JSON file describing the episode catalog.
-- `--dqn-episode-config-json '<json>'` (`DQN_EPISODE_CONFIG_JSON`): inline JSON alternative.
-- `--dqn-episode-loop` (`DQN_EPISODE_LOOP=1`): restart from the first scenario after consuming the list.
-
-Each entry in `backend/assets/episodes/sample_config.json` demonstrates the schema:
-
-- `id`: friendly label for logs.
-- `duration_steps`: number of DQN *decisions* (not simulator ticks) to run before resetting.
-- `slice_prb`: optional per-slice PRB quotas applied to every cell at episode start.
-- `ue_prb_cap`: optional per-UE DL cap.
-- `freeze_mobility`: keep spawned UEs stationary (handy for reproducible traces).
-- `ue_groups`: list of cohorts with `slice`, `count`, and optional traffic descriptors (`trace`/`trace_file`, `ue_ip`, `trace_speedup`, `trace_bin`).
-
-At the start of each episode the xApp clears any auto-spawned UEs, spawns the requested groups, attaches their traces directly at the gNB, resets the replay buffer queues, and runs for `duration_steps` decisions. The last transition in the episode is flagged with `done=True` so the replay buffer learns from terminal rollouts. When an episode finishes the simulator is reset automatically and the next scenario loads—no dashboard/front-end required for training loops.
-
-To point the React frontend at a specific backend instance, set these environment variables when launching `npm run dev` (or create a `frontend/.env.local`):
-
-```bash
-cd frontend
-NEXT_PUBLIC_WS_HOST=localhost \
-NEXT_PUBLIC_WS_PORT=8760 \
-
-export NEXT_PUBLIC_WS_HOST=localhost
-export NEXT_PUBLIC_WS_PORT=8760
-npm run dev
-```
-
-On Windows PowerShell:
-
-```powershell
-cd frontend
-$env:NEXT_PUBLIC_WS_HOST = "localhost"
-$env:NEXT_PUBLIC_WS_PORT = "8780"
-npm run dev
-```
-
-Any values you export become part of the generated WebSocket URL (`ws://<host>:<port>`), enabling multiple backend/frontend pairs to run side-by-side.
-
-Notes:
-- The xApp applies actions after each simulator step; changes take effect in the next allocation round.
-- Rewards use current KPIs and are a practical instantiation of the paper’s formulas; you can refine the shaping or weights in `settings/ran_config.py`.
-- If `torch` is unavailable, the xApp disables itself gracefully.
-- TensorBoard logging includes both the per-step reward and an exponential moving average (`reward_ema`) so you can quickly spot convergence trends.
-
-#### Sequential feature extractors (custom DQN)
-
-The handcrafted DQN xApp can swap its feature extractor between the default MLP and the sequence-aware models defined in `seq_models.py`. When `DQN_PRB_MODEL_ARCH` (or `--dqn-model-arch`) is set to `lstm`, `tcn`, or `seq2seq`, the xApp keeps a deque of the last `DQN_PRB_SEQ_LEN` states per cell (minimum enforced at 2) and feeds a `[batch, seq_len, state_dim]` tensor into the selected module, which outputs the 7 Q-values directly. Examples:
-
-```bash
-# LSTM encoder over the last 8 observations
-python backend/main.py --preset simple --mode server \
-  --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --dqn-model-arch lstm --dqn-seq-len 8
-
-# Temporal convolutional network (TCN)
-python backend/main.py --preset simple --mode server \
-  --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --dqn-model-arch tcn --dqn-seq-len 8
-
-# Seq2Seq attention extractor
-python backend/main.py --preset simple --mode server \
-  --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --dqn-model-arch seq2seq --dqn-seq-len 8
-
-
- python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces_long/eMBB_M4_aligned_trace_long.csv:10.0.0.4 --trace-raw-map IMSI_1:backend/assets/traces_long/URLLC_M1_aligned_trace_long.csv:10.0.0.1 --trace-raw-map IMSI_2:backend/assets/traces_long/mMTC_M5_aligned_trace_long.csv:10.0.0.5 --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --sim-step 1 --dqn-model-arch lstm --dqn-seq-hidden 8
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces/eMBB_constant.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/traces/URLLC_constant.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/traces/mMTC_constant.csv:172.30.1.250 --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --sim-step 1 --dqn-model-arch lstm --dqn-seq-hidden 8
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces/eMBB_constant.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/traces/URLLC_constant.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/traces/mMTC_constant.csv:172.30.1.250 --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-episode-len 1000 --dqn-episode-no-done --dqn-save-interval 10000 
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces/eMBB_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/traces/URLLC_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/traces/mMTC_constant_sec.csv:172.30.1.250 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-episode-len 1000 --dqn-episode-no-done --dqn-save-interval 10000 --trace-bin 0.001 --sim-step 0.05
-
-
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces/eMBB_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/traces/URLLC_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/traces/mMTC_constant_sec.csv:172.30.1.250 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --trace-bin 0.05 --sim-step 0.05
-
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/traces/eMBB_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/traces/URLLC_constant_sec.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/traces/mMTC_constant_sec.csv:172.30.1.250 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop  --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --trace-bin 0.05 --sim-step 0.05 -trace-debug
-###########this structure of the episode does not work properly
-
-
-  python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop
-
-
-  --dqn-device cuda
-  --dqn-log-interval 100
-
-###################### for evaluation #########################
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-model backend/models/past/dqn_prb_mlp_step100000.pt --dqn-prb  --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5  --dqn-save-interval 10000 --trace-bin 0.05 --sim-step 0.05 --dqn-epsilon-start 0 --dqn-epsilon-end 0
-
-
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-model backend/models/dqn_prb_lstm_seq2_step100000.pt --dqn-prb  --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 --dqn-model-arch lstm --dqn-seq-hidden 8  --trace-bin 0.05 --sim-step 0.05 --dqn-epsilon-start 0 --dqn-epsilon-end 0  
-
-python backend/main.py --preset simple --mode server \
-  --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
-  --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 \
-  --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 \
-  --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 \
-  --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop \
-  --trace-bin 0.05 --sim-step 0.05 \
-  --dqn-prb --dqn-model backend/models/dqn_prb_lstm_seq2_20251015_225859_step100000.pt\
-  --dqn-period 1 --dqn-move-step 5 \
-  --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 8 \
-  --dqn-aux-future-state --dqn-aux-horizon 4 --dqn-aux-weight 0.1 \
-  --dqn-epsilon-start 0 --dqn-epsilon-end 0 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 
-
-
-
-
-
-
-
 python -m backend.tools.convert_training_configs_to_gym_catalog \
   --input backend/notebooks/xapp_dqn_training_configs.json \
-  --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
-  --output backend/assets/episodes/gym_from_training_config.json \
-  --sim-step 0.002 \
-  --decision-period 1 \
-  --trace-bin 0
-
-
-  python -m backend.tools.convert_training_configs_to_gym_catalog \
-  --input backend/notebooks/xapp_dqn_training_configs.json \
-  --trace-root backend/notebooks/Unified_CMTC/traces/aligned \
-  --output backend/assets/episodes/gym_from_training_config.json \
-  --sim-step 0.002 --decision-period 10 \
-  --trace-bin 0 \
+  --trace-root backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned \
+  --output backend/assets/episodes/gym_trace_20s.json \
+  --sim-step 0.05 --decision-period 1 --trace-speedup 1.0 --trace-bin 0 \
   --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
-
-
-  python -m backend.tools.convert_training_configs_to_gym_catalog --input backend/notebooks/xapp_dqn_training_configs.json --trace-root backend/notebooks/Unified_CMTC/traces/aligned --output backend/assets/episodes/gym_from_training_config_10ms_nobin.json --sim-step 0.01 --decision-period 1 --trace-bin 0 --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
-
-Passing `--trace-bin 0` stamps each slice in the generated Gym catalog with `trace_bin: 0`, which the xApp propagates to `load_raw_packet_csv`; the simulator then replays traffic strictly according to the CSV `time` column (no implicit per-line binning).
-
-python backend/main.py \
-  --preset simple --mode headless --freeze-mobility \
-  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
-  --prb-gym-loop --prb-gym-shuffle \
-  --prb-const --prb-const-embb 120 --prb-const-urllc 40 --prb-const-log-interval 500 \
-  --sim-step 0.01 --trace-bin 0.01 --strict-real-traffic \
-  --steps 200000 --ws-port 8782 --dash-port 8072
-
-
-
-  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_simpler.json --prb-gym-shuffle --prb-const --prb-const-embb 120 --prb-const-urllc 40 --prb-const-log-interval 500 --sim-step 0.01 --trace-bin 0.01 --strict-real-traffic --steps 200000 --dqn-log-tb --ws-port 8782 --dash-port 8072
-
-
-
-
-python backend/main.py \
-  --preset simple --mode headless --freeze-mobility \
-  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
-  --prb-gym-shuffle \
-  --dqn-train --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 \
-  --sim-step 0.01 --trace-bin 0.01 \
-  --dqn-period 1 --dqn-move-step 5 \
-  --dqn-lr 5e-4 --dqn-target-update 2000 \
-  --dqn-epsilon-start 0.5 --dqn-epsilon-end 0.05 --prb-gym-eps-decay 5000000 \
-  --dqn-log-tb --steps 5500000 --dqn-save-interval 10000 \
-  --strict-real-traffic --ws-port 8782 --dash-port 8072
-
-To *evaluate* a previously trained Gym checkpoint (no replay buffer or optimizer updates, but the same TensorBoard metrics under an `eval/` namespace), pass both the checkpoint path and the evaluation switch:
-
-```bash
-python backend/main.py \
-  --preset simple --mode headless --freeze-mobility \
-  --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
-  --prb-gym-load-model backend/models/past_runs/lstm_seq8_step100000.pt \
-  --prb-gym-eval \
-  --sim-step 0.01 --trace-bin 0.01 --dqn-period 1 --dqn-move-step 5 \
-  --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 128 \
-  --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
-
-python backend/main.py \
-  --preset simple --mode headless --freeze-mobility \
-  --prb-gym \
-  --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json \
-  --prb-gym-load-model backend/models/past_runs/mlp_step100000.pt \
-  --prb-gym-eval \
-  --dqn-model-arch mlp \
-  --sim-step 0.01 --trace-bin 0.01 \
-  --dqn-period 1 --dqn-move-step 5 \
-  --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 \
-  --strict-real-traffic
-
-
-  python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json --prb-gym-load-model backend/models/past_runs/lstm_seq8_step100000.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
-
-
-
-python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s.json --prb-gym-load-model backend/models/past_runs/mlp_step100000.pt --prb-gym-eval --dqn-model-arch mlp --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic
-
-
-
-
-python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/lstm_seq4/dqn_prb_lstm_seq4_20251113_181132_step702240.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8773 --dash-port 8063
-
-17600000
-
-
-python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/lstm_seq16/dqn_prb_lstm_seq16_20251113_181137_step702240.pt --prb-gym-eval --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-model-arch lstm --dqn-seq-len 16 --dqn-seq-hidden 128 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8774 --dash-port 8064
-
-python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_12468_all_traces_test_1.json --prb-gym-load-model Eval_setups/mlp/dqn_prb_mlp_20251113_181139_step702240.pt --prb-gym-eval --dqn-model-arch mlp --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-epsilon-start 0.0 --dqn-epsilon-end 0.0 --strict-real-traffic --dqn-log-tb --steps 12800000 --ws-port 8775 --dash-port 8065
-
-
 ```
-
-The evaluation flag sets `PRB_GYM_TRAIN=0`, so the xApp replays the configured episodes, emits KPI/reward scalars to TensorBoard (tagged as `eval/...`), and restores weights from the file supplied via `--prb-gym-load-model` (or `PRB_GYM_LOAD_MODEL_PATH`).
-
-
-
-  python -m backend.tools.convert_training_configs_to_gym_catalog --input backend/notebooks/xapp_dqn_training_configs_Trace_20s_1_all_traces.json --trace-root backend/notebooks/Unified_CMTC/Trace_20s/traces/aligned --output backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_13579_all_traces.json --sim-step 0.01 --decision-period 5 --embb-ue-ip 10.0.0.2 --urllc-ue-ip 10.0.0.1
-
-
-
-
-python backend/main.py --preset simple --mode headless --freeze-mobility --prb-gym --prb-gym-config backend/assets/episodes/gym_from_training_config_10ms_Trace_20s_13579_all_traces.json --dqn-train --dqn-model-arch lstm --dqn-seq-len 4 --dqn-seq-hidden 128 --sim-step 0.01 --trace-bin 0.01 --dqn-period 5 --dqn-move-step 5 --dqn-lr 5e-4 --dqn-target-update 500 --dqn-epsilon-start 0.5 --dqn-epsilon-end 0.05 --prb-gym-eps-decay 704000 --dqn-log-tb --steps 1408000000 --dqn-save-interval 10000 --strict-real-traffic --ws-port 8764 --dash-port 8054
-
-
-
-##############################################################
-    python backend/main.py --preset simple --mode server \
-    --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 \
-    --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 \
-    --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 \
-    --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 \
-    --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop \
-    --trace-bin 0.05 --sim-step 0.05 \
-    --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 \
-    --dqn-model-arch lstm --dqn-seq-len 8 --dqn-seq-hidden 8 \
-    --dqn-aux-future-state --dqn-aux-horizon 4 --dqn-aux-weight 0.1 \
-    --dqn-save-interval 10000 --dqn-log-tb -slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5
-
-
-
-
-
-
-
-
-      python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --trace-bin 0.05 --sim-step 0.05 -trace-debug
-
-
-      python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5  --dqn-save-interval 10000 --trace-bin 0.01 --sim-step 0.01 --dqn-log-interval 100 --dqn-device cuda
-
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5  --dqn-save-interval 10000 --trace-bin 0.05 --sim-step 0.05
-
-
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 --dqn-model-arch lstm --dqn-seq-hidden 8  --trace-bin 0.05 --sim-step 0.05
-
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 --dqn-model-arch tcn --dqn-seq-hidden 8  --trace-bin 0.05 --sim-step 0.05
-
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 --dqn-model-arch seq2seq --dqn-seq-hidden 8  --trace-bin 0.05 --sim-step 0.05
-
-
-
-
-# timestep episode does not work correctly
-python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 --dqn-model-arch seq2seq --dqn-seq-hidden 8
-
-python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/URLLC_M1_aligned_trace_sec.csv:10.0.0.1 --trace-raw-map IMSI_1:backend/assets/New_traces/eMBB_M2_aligned_trace_sec.csv:10.0.0.2 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace_sec.csv:10.0.0.3 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-save-interval 10000 
-
-    # With our new data
-    python backend/main.py --preset simple --mode server --freeze-mobility --ue-embb 1 --ue-urllc 1 --ue-mmtc 1 --trace-raw-map IMSI_0:backend/assets/New_traces/eMBB_M2_aligned_trace.csv:172.30.1.250 --trace-raw-map IMSI_1:backend/assets/New_traces/URLLC_M1_aligned_trace.csv:172.30.1.250 --trace-raw-map IMSI_2:backend/assets/New_traces/mMTC_M3_aligned_trace.csv:172.30.1.250 --trace-bin 1.0 --trace-overhead-bytes 0 --trace-speedup 1.0 --strict-real-traffic --trace-loop --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 5 --kpi-history --kpi-log --dqn-log-tb --slice-prb eMBB=5 --slice-prb URLLC=5 --slice-prb mMTC=5 --dqn-episode-len 1000 --dqn-episode-no-done --dqn-save-interval 10000 --sim-step 0.05
-```
-
-You can achieve the same configuration via environment variables if you prefer, e.g. `DQN_PRB_MODEL_ARCH=seq2seq DQN_PRB_SEQ_LEN=8`. Set `--dqn-seq-hidden <dim>` (or `DQN_PRB_SEQ_HIDDEN`) to adjust the hidden width of the sequential extractor (default 128).
-
-Omit `--dqn-model-arch` (or set it to `mlp`) to keep the original feed-forward policy. The SB3-backed PRB allocator always uses MLP features today; if you want LSTM/TCN/Seq2Seq, stick with the custom DQN path above.
-
-Example: to evaluate a near-RT loop that reallocates PRBs roughly every 50 ms, run the simulator with a 50 ms step and keep the decision period at one tick:
-
-```bash
-python backend/main.py --preset simple --mode server \
-  --sim-step 0.05 --dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1 \
-  --kpi-history --kpi-log
-```
-
-With the default (1 s) step the same command would act every second; reducing the step pushes the DQN to react at 20 Hz, which sits comfortably inside the 10–100 ms near-RT budget typically cited for xApps that steer slice resources.
-
-**Timing quick reference**
-- Raw trace events preserve their original ordering but are scaled by `TRACE_SPEEDUP` (default 1.0). Values >1 speed the traffic up; <1 slow it down.
-- The simulator advances by `SIM_STEP_TIME_DEFAULT` every loop (default 1.0 s). During each step it injects all trace traffic scheduled for that interval, updates UE buffers, and runs every enabled xApp.
-- The PRB DQN only acts when the loop index is divisible by `DQN_PRB_DECISION_PERIOD_STEPS`. Effective decision cadence = `SIM_STEP_TIME_DEFAULT × DQN_PRB_DECISION_PERIOD_STEPS`.
-  * Default settings (`SIM_STEP_TIME_DEFAULT=1.0`, `dqn-period=1`): one PRB reallocation per second.
-  * Near-RT example above (`SIM_STEP_TIME_DEFAULT=0.05`, `dqn-period=1`): one reallocation every 50 ms.
-  * `SIM_STEP_TIME_DEFAULT=0.01` with `dqn-period=5`: still 50 ms cadence, but the simulator runs 10× more iterations per second.
-- `DQN_PRB_MOVE_STEP` controls how many PRBs shift per action; it does not change the cadence.
-- TensorBoard log directories, default W&B run names, and the default checkpoint path automatically append the active architecture (e.g. `dqn_prb_lstm_seq8_<timestamp>` / `backend/models/dqn_prb_lstm_seq8.pt`), making it easier to compare configurations.
-- The simulation loop stops automatically after `SIM_MAX_STEP` iterations (default 2 000 000). Bump the `SIM_MAX_STEP` environment variable if you need longer runs.
-
-### SB3 DQN PRB Allocator xApp
-
-`xapp_sb3_dqn_prb_allocator.py` mirrors the state/action/reward design of the custom DQN but uses the Stable-Baselines3
-implementation under the hood so you can validate results or reuse SB3 tooling. Enable it with:
-
-```bash
-pip install stable-baselines3 gymnasium  # if not already installed
-
-python backend/main.py --preset simple --mode server \
-  --sb3-dqn-prb --dqn-train --dqn-period 1 --dqn-move-step 1
-```
-
-Key toggles/env vars:
-- `--sb3-dqn-prb` (or `SB3_DQN_PRB_ENABLE=1`): enable the SB3-backed xApp.
-- `SB3_DQN_MODEL_PATH`: checkpoint path (defaults to `backend/models/dqn_prb_sb3.zip`).
-- `SB3_DQN_TOTAL_STEPS`, `SB3_DQN_TARGET_UPDATE`, `SB3_DQN_SAVE_INTERVAL`: tune learning horizon, target-network refresh, and autosave cadence.
-
-The xApp falls back to inference-only if SB3/Gymnasium are unavailable.
-
-Logging mirrors the custom DQN xApp, so you can reuse the same flags:
-
-- TensorBoard: `python backend/main.py ... --sb3-dqn-prb --dqn-train --dqn-log-tb --dqn-tb-dir backend/tb_logs`
-- Weights & Biases: `python backend/main.py ... --sb3-dqn-prb --dqn-train --dqn-wandb --dqn-wandb-project ai-ran-dqn`
-
-Both commands share the rest of the arguments with your run (UE counts, traces, etc.). Internally they set `DQN_TB_ENABLE` / `DQN_WANDB_ENABLE`, which the SB3 allocator now honors alongside the custom DQN.
-
-#### DQN Training Telemetry (TensorBoard / W&B)
-
-You can visualize training with TensorBoard or Weights & Biases (optional):
-
-- TensorBoard (recommended locally):
-  - Install: `pip install tensorboard`
-  - Run with logging:
-    ```bash
-    python backend/main.py --preset simple --mode server \
-      --dqn-prb --dqn-train --dqn-log-tb --dqn-tb-dir backend/tb_logs \
-      --kpi-history
-    ```
-  - Launch TensorBoard: `tensorboard --logdir backend/tb_logs`
-  - You’ll see per‑cell reward, slice scores (eMBB/URLLC/mMTC), loss, epsilon, PRB quotas, and action histograms.
-
-- Weights & Biases (cloud):
-  - Install and login: `pip install wandb && wandb login`
-  - Run with logging:
-    ```bash
-    python backend/main.py --preset simple --mode server \
-      --dqn-prb --dqn-train --dqn-wandb \
-      --dqn-wandb-project ai-ran-dqn --dqn-wandb-name local-run-1
-    ```
-  - The same metrics are logged to your W&B project.
-
-- Sample code run in tensorboard:
-```
-    python backend/main.py --preset simple --mode server   --ue-embb 10 --ue-urllc 10 --ue-mmtc 10 --freeze-mobility   --trace-raw-map slice:eMBB:backend/assets/traces/eMBB_aligned.csv:172.30.1.1   --trace-raw-map slice:URLLC:backend/assets/traces/URLLC_aligned.csv:172.30.1.1   --trace-raw-map slice:mMTC:backend/assets/traces/mMTC_aligned.csv:172.30.1.1   --trace-bin 1.0 --trace-speedup 1.0 --strict-real-traffic --trace-loop   --dqn-prb --dqn-train --dqn-period 2 --dqn-move-step 1   --kpi-history --kpi-log --dqn-log-tb --dqn-tb-dir backend/tb_logs
-```
----
-
-## 📝 License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 ---
 
-## 🤝 Contributing
+## ⚙️ Configuration Cheat Sheet
 
-Contributions are welcome! Please open issues or submit pull requests to improve the simulator.
+- `settings/sim_config.py` – step length, mobility toggles, trace replay defaults.
+- `settings/ran_config.py` – topology presets, base-station definitions, slice names, constant PRB map.
+- `settings/slice_config.py` – slice KPIs, PRB budgets, UE load targets.
+- `settings/ue_config.py` – UE radio profiles, mobility models.
+- `settings/ric_config.py` – xApp enable flags and controller wiring.
+- `settings/agent_config.py` – RL hyperparameters (gamma, epsilon, replay buffer sizes, logging paths).
+- `settings/ws_server_config.py` – WebSocket host/port.
+
+Every setting can be overridden at runtime. Example:
+
+```bash
+SIM_STEP_TIME_DEFAULT=0.05 TRACE_BIN=0 TRACE_LOOP=1 python main.py --mode headless
+```
 
 ---
 
-## 📬 Contact
+## 🧾 Logs & Artifacts
 
-For questions or support, please feel free to open issues.
+- `backend/kpi_logs/` – created when `--kpi-log` is enabled (per-step UE/cell CSVs).
+- `tb_logs/` – TensorBoard summaries from `--dqn-log-tb` or the Gym xApp.
+- `models/` – saved DQN checkpoints; default path is `backend/models/dqn_prb.pt`.
+- `assets/episodes/` – episodic catalogs for the Gym style or episodic DQN modes.
+- `evaluations/` – scripted evaluation configs (see `evaluations/IEEE_comm_mag_25/` for reference).
+
+---
+
+## 🧪 Typical Workflow
+
+1. **Generate traces** using the Unified CMTC notebook suite and export aligned CSVs.
+2. **Create training configs** (`xapp_dqn_training_configs_*.json`) with the same notebook.
+3. **Convert** configs to a Gym catalog when working with episodic/Gym runs.
+4. **Train** via `python main.py --mode headless --preset simple --freeze-mobility \ ... --dqn-prb --dqn-train` or `--prb-gym`.
+5. **Evaluate** the resulting checkpoint in server mode together with the frontend/KPI dashboard.
+
+This README now documents only the components that are actively maintained in the current workflow. If you re-enable any legacy behaviour (e.g., other xApps or mobility models), add the relevant notes here so the team keeps a single source of truth.
