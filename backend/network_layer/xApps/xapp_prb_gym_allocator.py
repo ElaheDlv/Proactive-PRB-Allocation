@@ -553,15 +553,15 @@ class PRBGymEnv:
         under = max(0.0, target - latency_avg)
         return coeff * (under / target)
 
-    def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
-        """Penalty proportional to PRB usage but suppressed when latency score is low."""
-        coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
-        if coeff <= 0.0:
-            return 0.0
-        usage = max(0.0, slice_prb) / max(1e-6, max_prb)
-        #slack = max(0.0, 1.0 - float(score))
-        slack = float(score)
-        return coeff * usage * slack
+    # def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
+    #     """Penalty proportional to PRB usage but suppressed when latency score is low."""
+    #     coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
+    #     if coeff <= 0.0:
+    #         return 0.0
+    #     usage = max(0.0, slice_prb) / max(1e-6, max_prb)
+    #     #slack = max(0.0, 1.0 - float(score))
+    #     slack = float(score)
+    #     return coeff * usage * slack
     
     def _slice_prb_penalty(self, slice_prb, slice_name, max_prb, score):
         coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
