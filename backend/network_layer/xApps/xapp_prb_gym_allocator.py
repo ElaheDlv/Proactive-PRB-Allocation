@@ -124,7 +124,11 @@ class PRBGymEnv:
             self.w_e /= total_w
             self.w_u /= total_w
         self._latency_targets = self._init_latency_targets()
+        # self._latency_spans = self._init_latency_spans()
+        # self._latency_bonus = self._init_latency_bonus()
+        # self._prb_penalty = self._init_prb_penalty()
         self._latency_sigmoid = self._init_latency_sigmoid()
+        # self._latency_tail = self._init_latency_tail()
 
         self._episodes = self._load_episode_specs()
         self._shuffle_catalog = bool(getattr(settings, "PRB_GYM_SHUFFLE_EPISODES", False))
@@ -415,12 +419,13 @@ class PRBGymEnv:
         return agg
 
     def _reward(self, cell):
-        """Latency-focused reward using a simple sigmoid on normalised latency."""
+        """Latency-focused reward with URLLC emphasis and under-target bonuses."""
         agg = self._aggregate_slice_metrics(cell)
         max_prb = max(1.0, float(getattr(cell, "max_dl_prb", 1.0)))
         scores: Dict[str, Dict[str, float]] = {}
         weights = {SL_E: self.w_e, SL_U: self.w_u}
         weighted = 0.0
+        bonus_total = 0.0
         for sl in (SL_E, SL_U):
             data = agg[sl]
             latency_avg = 0.0
@@ -428,7 +433,11 @@ class PRBGymEnv:
             if cnt > 0:
                 latency_avg = float(data.get("latency_sum", 0.0) or 0.0) / max(1, cnt)
             score = self._slice_score(latency_avg, sl)
+            #bonus = self._slice_bonus(latency_avg, sl)
             slice_prb = float(data.get("slice_prb", 0.0) or 0.0)
+            #prb_pen = self._slice_prb_penalty(slice_prb, sl, max_prb, score)
+            #score = max(0.0, score - prb_pen)
+            score = max(0.0, score)
             buf_bytes = float(data.get("buf_bytes", 0.0) or 0.0)
             tx_mbps = float(data.get("tx_mbps", 0.0) or 0.0)
             demand_prb = max(0.0, float(data.get("prb_req", 0.0) or 0.0))
@@ -438,8 +447,12 @@ class PRBGymEnv:
             else:
                 denom = max(1.0, demand_prb)
             grant_ratio = self._clamp01(granted_prb / denom)
+            efficiency = score / (slice_prb + 1)
             scores[sl] = {
                 "score": score,
+                #"bonus": bonus,
+                #"prb_penalty": prb_pen,
+                "efficiency": efficiency,
                 "prb_usage_norm": slice_prb / max_prb,
                 "prb_usage_prb": slice_prb,
                 "latency": latency_avg,
@@ -450,9 +463,10 @@ class PRBGymEnv:
                 "prb_req": demand_prb,
                 "prb_granted": granted_prb,
             }
-            weighted += weights[sl] * score
-        total_reward = self._clamp01(weighted)
-        return total_reward, scores
+            weighted += weights[sl] * efficiency
+            #bonus_total += bonus
+        #total_reward = max(0, min(1.0, weighted + bonus_total))
+        return weighted, scores
     
 
 
@@ -469,33 +483,124 @@ class PRBGymEnv:
             SL_U: _target(SL_U, 0.001), # 1 ms default (seconds)
         }
 
+    # def _init_latency_spans(self) -> Dict[str, float]:
+    #     """Define how far beyond the target latency each slice can go before score=0."""
+    #     slices_cfg = getattr(settings, "NETWORK_SLICES", {})
+
+    #     def _span(name: str, fallback_mult: float) -> float:
+    #         cfg = slices_cfg.get(name, {})
+    #         span_val = cfg.get("latency_span")
+    #         if span_val is not None:
+    #             return max(1e-6, float(span_val))
+    #         target = self._latency_targets.get(name, 1.0)
+    #         return max(1e-6, target * fallback_mult)
+
+    #     return {
+    #         SL_E: _span(SL_E, 3.0),   # eMBB tolerates up to ~2× target (200 ms)
+    #         SL_U: _span(SL_U, 5.0),   # URLLC score hits zero quickly (~3 ms)
+    #     }
+
+    # def _init_latency_bonus(self) -> Dict[str, float]:
+    #     """Per-slice coefficients for rewarding sub-target latency."""
+    #     return {
+    #         SL_E: float(getattr(settings, "PRB_GYM_LAT_BONUS_EMBB", 0.02)),
+    #         SL_U: float(getattr(settings, "PRB_GYM_LAT_BONUS_URLLC", 0.05)),
+    #     }
+
+    # def _init_prb_penalty(self) -> Dict[str, float]:
+    #     """Per-slice coefficients penalising large PRB quotas."""
+    #     return {
+    #         SL_E: float(getattr(settings, "PRB_GYM_PRB_PENALTY_EMBB", 0.3)),
+    #         SL_U: float(getattr(settings, "PRB_GYM_PRB_PENALTY_URLLC", 0.3)),
+    #     }
+
+    # def _init_latency_sigmoid(self) -> Dict[str, float]:
+    #     """Slope controls for the logistic component (higher => sharper drop)."""
+    #     return {
+    #         SL_E: float(getattr(settings, "PRB_GYM_SIGMOID_ALPHA_EMBB", 2.0)),
+    #         SL_U: float(getattr(settings, "PRB_GYM_SIGMOID_ALPHA_URLLC", 3.0)),
+    #     }
+        
     def _init_latency_sigmoid(self) -> Dict[str, Dict[str, float]]:
         """Sigmoid parameters (a: slope, b: midpoint in normalised latency space)."""
-        base_a = float(getattr(settings, "PRB_GYM_SIGMOID_A", 6.0))
-        base_b = float(getattr(settings, "PRB_GYM_SIGMOID_B", 1.0))
         return {
             SL_E: {
-                "a": float(getattr(settings, "PRB_GYM_SIGMOID_A_EMBB", base_a)),
-                "b": float(getattr(settings, "PRB_GYM_SIGMOID_B_EMBB", base_b)),
+                "a": float(getattr(settings, "PRB_GYM_SIGMOID_A_EMBB", -35.0)),
+                "b": float(getattr(settings, "PRB_GYM_SIGMOID_B_EMBB", 4.5)),
             },
             SL_U: {
-                "a": float(getattr(settings, "PRB_GYM_SIGMOID_A_URLLC", base_a)),
-                "b": float(getattr(settings, "PRB_GYM_SIGMOID_B_URLLC", base_b)),
+                "a": float(getattr(settings, "PRB_GYM_SIGMOID_A_URLLC", -9000.0)),
+                "b": float(getattr(settings, "PRB_GYM_SIGMOID_B_URLLC", 4.5)),
             },
         }
 
+    # def _init_latency_tail(self) -> Dict[str, float]:
+    #     """Tail parameters for heavy penalties once violations grow large."""
+    #     return {
+    #         SL_E: float(getattr(settings, "PRB_GYM_TAIL_C_EMBB", 0.5)),
+    #         SL_U: float(getattr(settings, "PRB_GYM_TAIL_C_URLLC", 0.5)),
+    #     }
+
+    # def _slice_score(self, latency_avg: float, slice_name: str) -> float:
+    #     """Smooth logistic+tail score in [0,1] measuring latency adherence."""
+    #     target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+    #     span = max(1e-9, self._latency_spans.get(slice_name, target))
+    #     #print(f"Slice {slice_name}: latency_avg={latency_avg:.6f}s, target={target:.6f}s, span={span:.6f}s")
+    #     x = (latency_avg - target) / span  # normalised violation around zero
+    #     alpha = max(1e-6, self._latency_sigmoid.get(slice_name, 6.0))
+    #     z = alpha * x
+    #     z = max(-60.0, min(60.0, z))  # prevent overflow in exp()
+    #     central = 1.0 / (1.0 + math.exp(z))  # smooth drop near target
+    #     pos = max(0.0, x)
+    #     tail_c = max(1e-6, self._latency_tail.get(slice_name, 0.5))
+    #     tail = 1.0 / (1.0 + pos / tail_c)  # heavy penalties for large violations
+    #     w = pos / (1.0 + pos)  # blend factor once we exceed the budget
+    #     score = (1.0 - w) * central + w * tail
+    #     eps = 1e-3
+    #     return max(eps, min(1.0 - eps, score))
+    
     def _slice_score(self, latency_avg: float, slice_name: str) -> float:
         """Single sigmoid in [0,1] over normalised latency (lat/target)."""
         target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
-        norm_latency = max(0.0, latency_avg) / target
+        x = (latency_avg - target)
         params = self._latency_sigmoid.get(slice_name, {}) or {}
         a = max(1e-6, float(params.get("a", 6.0)))   # slope of the drop
         b = float(params.get("b", 1.0))              # midpoint (norm_latency where score=0.5)
-        z = a * (norm_latency - b)
+        z = a * x + b
         z = max(-60.0, min(60.0, z))  # prevent overflow
-        score = 1.0 / (1.0 + math.exp(z))
-        eps = 1e-3
-        return max(eps, min(1.0 - eps, score))
+        score = 1.0 / (1.0 + math.exp(-z))
+        return score
+
+    # def _slice_bonus(self, latency_avg: float, slice_name: str) -> float:
+    #     """Additional reward for staying below the latency budget."""
+    #     coeff = max(0.0, self._latency_bonus.get(slice_name, 0.0))
+    #     if coeff <= 0.0:
+    #         return 0.0
+    #     target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
+    #     under = max(0.0, target - latency_avg)
+    #     return coeff * (under / target)
+
+    # def _slice_prb_penalty(self, slice_prb: float, slice_name: str, max_prb: float, score: float) -> float:
+    #     """Penalty proportional to PRB usage but suppressed when latency score is low."""
+    #     coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
+    #     if coeff <= 0.0:
+    #         return 0.0
+    #     usage = max(0.0, slice_prb) / max(1e-6, max_prb)
+    #     #slack = max(0.0, 1.0 - float(score))
+    #     slack = float(score)
+    #     return coeff * usage * slack
+    
+    # def _slice_prb_penalty(self, slice_prb, slice_name, max_prb, score):
+    #     coeff = max(0.0, self._prb_penalty.get(slice_name, 0.0))
+    #     if coeff <= 0.0:
+    #         return 0.0
+    #     usage = max(0.0, slice_prb) / max(1e-6, max_prb)
+    
+    #     # Apply penalty only when latency is already good (score > 0.5)
+    #     good_perf = 1 / (1 + math.exp(-8 * (score - 0.5)))  # ~0 when score<0.5, ~1 when >0.7
+    #     penalty = coeff * usage * good_perf
+    #     return penalty
+
 
     def _reset_progress_bar(self):
         self._episode_progress_bar = None
@@ -895,15 +1000,19 @@ class xAppGymPRBAllocator(xAppBase):
         scope = self._tb_scope
         try:
             self._tb.add_scalar(f"{scope}/reward", float(reward), self.timestep)
-                self._tb.add_scalar(f"{scope}/reward_running_avg", float(self._reward_running_avg), self.timestep)
-                self._tb.add_scalar(f"{scope}/return_cumulative", float(self._cumulative_return), self.timestep)
-                self._tb.add_scalar(f"{scope}/expected_return", float(self._expected_return), self.timestep)
-                self._tb.add_scalar(f"{scope}/epsilon", float(epsilon), self.timestep)
-                if loss is not None:
-                    self._tb.add_scalar(f"{scope}/loss", float(loss), self.timestep)
+            self._tb.add_scalar(f"{scope}/reward_running_avg", float(self._reward_running_avg), self.timestep)
+            self._tb.add_scalar(f"{scope}/return_cumulative", float(self._cumulative_return), self.timestep)
+            self._tb.add_scalar(f"{scope}/expected_return", float(self._expected_return), self.timestep)
+            self._tb.add_scalar(f"{scope}/epsilon", float(epsilon), self.timestep)
+            if loss is not None:
+                self._tb.add_scalar(f"{scope}/loss", float(loss), self.timestep)
             for sl, metrics in slice_metrics.items():
                 label = "eMBB" if sl == SL_E else "URLLC"
                 self._tb.add_scalar(f"{scope}/{label}/score", float(metrics["score"]), self.timestep)
+                # if "bonus" in metrics:
+                #     self._tb.add_scalar(f"train/{label}/bonus", float(metrics["bonus"]), self.timestep)
+                if "prb_penalty" in metrics:
+                    self._tb.add_scalar(f"{scope}/{label}/prb_penalty", float(metrics["prb_penalty"]), self.timestep)
                 prb_norm = float(metrics.get("prb_usage_norm", 0.0))
                 prb_abs = float(metrics.get("prb_usage_prb", 0.0))
                 self._tb.add_scalar(f"{scope}/{label}/prb_usage_norm", prb_norm, self.timestep)
