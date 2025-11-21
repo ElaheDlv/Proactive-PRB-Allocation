@@ -114,8 +114,8 @@ class PRBGymEnv:
         self.norm_buf_bytes = float(getattr(settings, "DQN_NORM_MAX_BUF_BYTES", 1e5))
         self.need_saturation = max(1e-6, float(getattr(settings, "DQN_NEED_SATURATION", 1.5)))
         self.urlc_gamma_s = float(getattr(settings, "DQN_URLLC_GAMMA_S", 0.01))
-        self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.5))
-        self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.5))
+        self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.3))
+        self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.7))
         total_w = self.w_e + self.w_u
         if total_w <= 0:
             self.w_e = self.w_u = 0.5
@@ -421,6 +421,8 @@ class PRBGymEnv:
         scores: Dict[str, Dict[str, float]] = {}
         weights = {SL_E: self.w_e, SL_U: self.w_u}
         weighted = 0.0
+        #penalty_coeff = 0.5
+        SCALE = 5.0 
         for sl in (SL_E, SL_U):
             data = agg[sl]
             latency_avg = 0.0
@@ -439,7 +441,14 @@ class PRBGymEnv:
             else:
                 denom = max(1.0, demand_prb)
             grant_ratio = self._clamp01(granted_prb / denom)
-            efficiency = score / (slice_prb + 1)
+            # --- Stabilizer (URLLC needs smaller, eMBB larger) ---
+            sigma = 2.0 if sl == SL_U else 8.0
+            #alpha = 100.0 if sl == SL_U else 100.0
+            alpha = 100
+
+            # --- Log-based efficiency ---
+            efficiency = SCALE * math.log(1.0 + (alpha * score) / (sigma + slice_prb))
+            #efficiency = score / (slice_prb + 1)
             scores[sl] = {
                 "score": score,
                 "efficiency": efficiency,
@@ -453,6 +462,7 @@ class PRBGymEnv:
                 "prb_req": demand_prb,
                 "prb_granted": granted_prb,
             }
+            #weighted += weights[sl] * (score - penalty_coeff * (slice_prb / max_prb))
             weighted += weights[sl] * efficiency
         return weighted, scores
     
@@ -491,7 +501,8 @@ class PRBGymEnv:
         target = max(1e-9, self._latency_targets.get(slice_name, 1.0))
         x = (latency_avg - target)
         params = self._latency_sigmoid.get(slice_name, {}) or {}
-        a = max(1e-6, float(params.get("a", 6.0)))   # slope of the drop
+        #a = max(1e-6, float(params.get("a", 6.0)))   # slope of the drop
+        a = float(params.get("a", 6.0))
         b = float(params.get("b", 1.0))              # midpoint (norm_latency where score=0.5)
         z = a * x + b
         z = max(-60.0, min(60.0, z))  # prevent overflow
