@@ -114,8 +114,8 @@ class PRBGymEnv:
         self.norm_buf_bytes = float(getattr(settings, "DQN_NORM_MAX_BUF_BYTES", 1e5))
         self.need_saturation = max(1e-6, float(getattr(settings, "DQN_NEED_SATURATION", 1.5)))
         self.urlc_gamma_s = float(getattr(settings, "DQN_URLLC_GAMMA_S", 0.01))
-        self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.3))
-        self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.7))
+        self.w_e = float(getattr(settings, "DQN_WEIGHT_EMBB", 0.5))
+        self.w_u = float(getattr(settings, "DQN_WEIGHT_URLLC", 0.5))
         total_w = self.w_e + self.w_u
         if total_w <= 0:
             self.w_e = self.w_u = 0.5
@@ -442,9 +442,8 @@ class PRBGymEnv:
                 denom = max(1.0, demand_prb)
             grant_ratio = self._clamp01(granted_prb / denom)
             # --- Stabilizer (URLLC needs smaller, eMBB larger) ---
-            sigma = 2.0 if sl == SL_U else 8.0
-            #alpha = 100.0 if sl == SL_U else 100.0
-            alpha = 100
+            sigma = 2.0 if sl == SL_U else 5.0
+            alpha = 50.0 if sl == SL_U else 100.0
 
             # --- Log-based efficiency ---
             efficiency = SCALE * math.log(1.0 + (alpha * score) / (sigma + slice_prb))
