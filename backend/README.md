@@ -57,6 +57,7 @@ python main.py [--mode server|headless] [options...]
 - `--ue-embb/--ue-urllc/--ue-mmtc` – in the simple preset, deterministically spawn exactly this many subscribers per slice.
 - `--freeze-mobility` (or `SIM_FREEZE_MOBILITY=1`) – pin UE locations to keep SINR/MCS constant so PRB changes are isolated.
 - `--sim-step S` – simulation step length in seconds (default 1.0).
+- `--sim-seed N` (or `SIM_SEED=N`) – seed Python/NumPy/torch RNGs so UE placement, traces, and models are reproducible.
 - `--steps K` – number of steps to run in headless mode.
 
 Example (server mode, deterministic slice mix, stationary UEs):

@@ -2,10 +2,41 @@ import os
 import argparse
 import asyncio
 import json
+import random
 from functools import partial
 
 import importlib
 import dotenv
+
+
+def _apply_global_seed(seed_value: str | int | None) -> None:
+    """Seed Python, NumPy, and torch RNGs when SIM_SEED/--sim-seed is provided."""
+    if seed_value in (None, ""):
+        return
+    try:
+        seed = int(seed_value)
+    except Exception:
+        print(f"[main] Invalid SIM_SEED '{seed_value}'; ignoring.")
+        return
+
+    random.seed(seed)
+    try:
+        import numpy as np
+
+        np.random.seed(seed)
+    except Exception:
+        pass
+
+    try:
+        import torch
+
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+    except Exception:
+        pass
+
+    print(f"[main] Applied global RNG seed: {seed}")
 
 # -------------------------------------------------------------
 # CLI args to control topology preset and run mode before import
@@ -29,6 +60,11 @@ parser.add_argument("--ws-port", type=int, help="WebSocket server port (default 
 parser.add_argument("--dash-port", type=int, help="Port for the live KPI dashboard (default 8059)")
 parser.add_argument("--steps", type=int, default=120, help="Headless: number of steps to run")
 parser.add_argument("--sim-step", type=float, help="Simulation step duration in seconds (default 1.0)")
+parser.add_argument(
+    "--sim-seed",
+    type=int,
+    help="Global RNG seed for deterministic UE placement, traces, and models",
+)
 # KPI dashboard controls
 parser.add_argument(
     "--kpi-max-points",
@@ -206,6 +242,8 @@ if args.freeze_mobility:
     os.environ["SIM_FREEZE_MOBILITY"] = "1"
 if args.sim_step is not None:
     os.environ["SIM_STEP_TIME_DEFAULT"] = str(args.sim_step)
+if args.sim_seed is not None:
+    os.environ["SIM_SEED"] = str(args.sim_seed)
 
 # KPI dashboard env exports
 if args.kpi_max_points is not None:
@@ -393,6 +431,8 @@ if args.slice_prb:
 
 # Load .env (won't override already-set env)
 dotenv.load_dotenv()
+
+_apply_global_seed(os.getenv("SIM_SEED", "").strip())
 
 from flask import logging
 import websockets

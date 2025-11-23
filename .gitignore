@@ -132,3 +132,5 @@ dmypy.json
 old_tb_logs/
 Trained_models/
 Eval_setups/
+Eval_setup/
+Eval_setup_1/
