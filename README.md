@@ -40,7 +40,4 @@ The original simulator is available here:
 
 This version includes several modifications to support:
 - Custom **trace generation** and **aligned traffic modeling**
-- Extended **state transitions** and **parameterized behavior** (e.g., α, β, γ changes)
-- Integration with **AI-based RAN slicing** experiments
-
-More details will be added after the experiments are finalized.
+- Extended **state transitions** and **parameterized behavior** 
