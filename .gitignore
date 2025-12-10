@@ -129,6 +129,8 @@ dmypy.json
 *.csv
 *.jpg
 *.png
+*.txt
+*.json
 old_tb_logs/
 Trained_models/
 Eval_setups/
